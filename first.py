@@ -104,8 +104,8 @@ class Spoonacular:
         return response.text
 
         #https://api.spoonacular.com/recipes/random?number=1&tags=vegetarian,dessert
-var1 = Spoonacular()
-var1.get_recipies()
+# var1 = Spoonacular()
+# var1.get_recipies()
 
 
 
@@ -178,18 +178,12 @@ class Tasty:
         data = json.loads(r.text)
         for val in range(len(data['results'])):
             try:
-                try:
-                    x = data['results'][val]["tags"]['display name']
-                    if x not in dict1:
-                        dict1[x] = 0
-                    dict1[x] += 1 
-                except:
-                    for y in range(len(data['results'][val]["tags"])):
-                        if data['results'][val]["tags"]['type'] == 'cuisine': 
-                            x = data['results'][val]["tags"]['display name'] 
-                            if x not in dict1:
-                                dict1[x] = 0
-                            dict1[x] += 1 
+                for tag in data['results'][val]["tags"]:
+                    if tag['type'] == 'cuisine': 
+                        x = tag['display_name']
+                        if x not in dict1:
+                            dict1[x] = 0
+                        dict1[x] += 1 
             except:
                 x = "Cuisine not classified"     
                 if x not in dict1:
@@ -197,3 +191,6 @@ class Tasty:
                 dict1[x] += 1   
         print(dict1)
         return dict1
+
+var = Tasty()
+var.get_dict()
