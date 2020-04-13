@@ -105,13 +105,22 @@ class Spoonacular:
 
 
 
-var = Spoonacular()
-var.get_recipies()
-
-
-#Tasty API 
 
 
 
-# new change
 
+class Tasty:
+    def get_tasty_recipies(self):
+        url = "https://tasty.p.rapidapi.com/recipes/list"
+
+        querystring = {"from":"0","sizes":"100"}
+
+        headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
+
+        response = requests.request("GET", url, headers=headers, params=querystring)
+
+        print(response.text)
+        return response.text
+
+var = Tasty()
+var.get_tasty_recipies()
