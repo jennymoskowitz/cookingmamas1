@@ -86,45 +86,16 @@ def get_random_recipes(self, limitLicense=None, number=100, tags=None):
     https://spoonacular.com/food-api/docs#get-random-recipes
     """
     endpoint = "recipes/random"
-    url_query = {}
-    url_params = {"limitLicense": limitLicense, "number": number, "tags": tags}
-    return self._make_request(endpoint, method="GET", query_=url_query, params_=url_params)
+    url_query = {}
+    url_params = {"limitLicense": limitLicense, "number": number, "tags": tags}
+    return self._make_request(endpoint, method ='GET', query_=url_query, params_=url_params)
 
 
-get_random_recipes()
 
 
 
 
 #Tasty API 
-
-def get_recipes(self, title):
-    url = "https://tasty.p.rapidapi.com/recipes/list"
-
-    querystring = {,"q":"{}","from":"0","sizes":"20"}
-
-    headers = {
-        'x-rapidapi-host': "tasty.p.rapidapi.com",
-        'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"
-        }
-
-    response = requests.request("GET", url, headers=headers, params=querystring)
-
-    print(response.text)
-
-def get_similarities(self, recipie):
-    url = "https://tasty.p.rapidapi.com/recipes/list-similarities"
-
-    querystring = {"recipe_id":"5586"}
-
-    headers = {
-        'x-rapidapi-host': "tasty.p.rapidapi.com",
-        'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"
-        }
-
-    response = requests.request("GET", url, headers=headers, params=querystring)
-
-    print(response.text)
 
 
 
