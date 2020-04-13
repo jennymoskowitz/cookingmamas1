@@ -159,3 +159,41 @@ var1.get_recipies()
 #     col = ['recipeName', 'rating', 'totalTimeInSeconds', 'course', 'cuisine', 'ingredients']
 #     recipes=recipes[col]
 #     https://api.spoonacular.com/recipes/random?number=1&tags=vegetarian,dessert
+
+class Tasty:
+    def get_tasty_recipies(self):
+        url = "https://tasty.p.rapidapi.com/recipes/list"
+
+        querystring = {"from":"0","sizes":"100"}
+
+        headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
+
+        response = requests.request("GET", url, headers=headers, params=querystring)
+
+        return response
+
+    def get_dict(self):
+        dict1 = {}
+        r = self.get_tasty_recipies()
+        data = json.loads(r.text)
+        for val in range(len(data['results'])):
+            try:
+                try:
+                    x = data['results'][val]["tags"]['display name']
+                    if x not in dict1:
+                        dict1[x] = 0
+                    dict1[x] += 1 
+                except:
+                    for y in range(len(data['results'][val]["tags"])):
+                        if data['results'][val]["tags"]['type'] == 'cuisine': 
+                            x = data['results'][val]["tags"]['display name'] 
+                            if x not in dict1:
+                                dict1[x] = 0
+                            dict1[x] += 1 
+            except:
+                x = "Cuisine not classified"     
+                if x not in dict1:
+                    dict1[x] = 0
+                dict1[x] += 1   
+        print(dict1)
+        return dict1
