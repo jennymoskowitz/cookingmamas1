@@ -30,53 +30,71 @@ def write_cache(CACHE_FNAME, CACHE_DICT):
     with open(CACHE_FNAME, 'w') as f:
         json.dump(CACHE_DICT, f)
 
-def get_cuisine(cuisine):
-    #spoontacular API
-    #cuisine_list = ["African", "American", "British", "Cajun", "Caribbean", "Chinese", "Eastern European", "European",
-    #"French", "German", "Greek", "Indian", "Irish", "Italian", "Japanese", "Jewish", "Korean", "Latin American", 
-    #"Mediterranean", "Mexican", "Middle Eastern", "Nordic", "Southern", "Spanish", "Thai", "Vietnamese"]
-    #"?apiKey=" + API_KEY + 
-    #num = '10'
-    #+ "?number" + num
-    base_url = 'https://api.spoonacular.com/'
-    endpoint = 'recipies/search'
-    params = "?cuisine" + cuisine
-    r = requests.get((base_url + endpoint + params))
-    data = json.loads(r.text)
-    print(data)
 
-#def _make_request(self, path, method='GET', endpoint=None,
-                      #query_=None, params_=None, json_=None):
-        #""" Make a request to the API """
+def __init__(self, api_key, timeout=5, sleep_time=1.5, allow_extra_calls=False):
+    """ Spoonacular API Constructor
+    :param api_key: key provided by Spoonacular (str)
+    :param timeout: time before quitting on response (seconds)
+    :param sleep_time: time to wait between requests (seconds)
+    :param allow_extra_calls: override the API call limit (bool)
+    """
 
-    
-    #uri = self.api_root + path
+    assert api_key != 'd6138d2114b64120b05c0cbdb7c92f60'
+    self.api_key = api_key
+    self.api_root = "https://api.spoonacular.com/"
+    self.timeout = timeout
+    self.sleep_time = max(sleep_time, 1)  # Rate limiting TODO: Make this immutable
+    self.allow_extra_calls = allow_extra_calls
+
+def _make_request(self, path, method='GET', endpoint=None, query_=None, params_=None, json_=None):
+    """ Make a request to the API """
+
+    # Check if the API call cost will exceed the quota
+    endpoint = inspect.stack()[1].function
+    try:
+        uri = self.api_root + path
 
         # API auth (temporary kludge)
-    #if params_:
-        #params_['apiKey'] = self.api_key
-    #else:
-        #params_ = {'apiKey': self.api_key}
-   # response = self.session.request(method, uri,
-          #                          timeout=self.timeout,
-          #                          data=query_,
-           #                         params=params_,
-           #                         json=json_)
+        if params_:
+            params_['apiKey'] = self.api_key
+        else:
+            params_ = {'apiKey': self.api_key}
+        response = self.session.request(method, uri, timeout=self.timeout, data=query_, params=params_, json=json_)
+    except socket.timeout as e:
+        print("Timeout raised and caught: {}".format(e))
+        return
+    time.sleep(self.sleep_time)  # Enforce rate limiting
+    return response
+
+#def _make_request(self, method='GET', params_=None, json_=None):
+   # """ Make a request to the API """
+   # uri = "https://api.spoonacular.com/"
+
+    #params_ = {'apiKey': 'd6138d2114b64120b05c0cbdb7c92f60'}
+    #response = self.session.request(method, uri,
+      #                              timeout=self.timeout,
+      #                              data=query_,
+      #                              params=params_,
+       #                             json=json_)
     #return response
 
 
-def classify_cuisine(self, cuisine):
-    
-        endpoint = "recipes/cuisine"
-        url_query = {"cuisine": cuisine}
-        url_params = {}
-        try:
-            return self._make_request(endpoint, method="POST", query_=url_query, params_=url_params
-        except:
-            print("Cuisine not found")
 
 
-classify_cuisine("Greek")
+def get_random_recipes(self, limitLicense=None, number=100, tags=None):
+    """ Find random (popular) recipes.
+    https://spoonacular.com/food-api/docs#get-random-recipes
+    """
+    endpoint = "recipes/random"
+    url_query = {}
+    url_params = {"limitLicense": limitLicense, "number": number, "tags": tags}
+    return self._make_request(endpoint, method="GET", query_=url_query, params_=url_params)
+
+
+get_random_recipes()
+
+
+
 
 #Tasty API 
 
