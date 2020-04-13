@@ -7,7 +7,7 @@ import math
 import numpy as np
 import os
 
-API_KEY = 'd6138d2114b64120b05c0cbdb7c92f60'
+
 #dir_path = os.path.dirname(os.path.realpath(__file__))
 #self.CACHE_FNAME = dir_path + '/' + "cache_spoonacular.json"
 
@@ -36,6 +36,7 @@ def write_cache(CACHE_FNAME, CACHE_DICT):
 
 
 class Spoonacular:
+ 
     # def __init__(self, api_key, timeout=5, sleep_time=1.5, allow_extra_calls=False):
     #     """ Spoonacular API Constructor
     #     :param api_key: key provided by Spoonacular (str)
@@ -95,32 +96,66 @@ class Spoonacular:
     #     return self._make_request(endpoint, method ='GET', query_=url_query, params_=url_params)
     
     def get_recipies(self):
-        url = 'https://api.spoonacular.com/'
-        endpoint = "recipes/random"
-        params = "?apiKey" + API_KEY + "number" + "100"
-        r = requests.get((url + endpoint + params))
-        print(r.text)
-        #data = json.loads(r.text)
-        return r.text
-
-
-
-
-
-
-
-class Tasty:
-    def get_tasty_recipies(self):
-        url = "https://tasty.p.rapidapi.com/recipes/list"
-
-        querystring = {"from":"0","sizes":"100"}
-
-        headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
-
-        response = requests.request("GET", url, headers=headers, params=querystring)
-
+        url = 'https://api.spoonacular.com/recipes/random'
+        params = {"apiKey" : '3adec4cbad224f2c9596d4c011d346fc', "number" : "100"}
+        response = requests.request("GET", url, params = params)
         print(response.text)
+        #data = json.loads(r.text)
         return response.text
 
-var = Tasty()
-var.get_tasty_recipies()
+        #https://api.spoonacular.com/recipes/random?number=1&tags=vegetarian,dessert
+var1 = Spoonacular()
+var1.get_recipies()
+
+
+
+
+
+
+
+# class Tasty:
+#     def get_tasty_recipies(self):
+#         url = "https://tasty.p.rapidapi.com/recipes/list"
+
+#         querystring = {"from":"0","sizes":"100"}
+
+#         headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
+
+#         response = requests.request("GET", url, headers=headers, params=querystring)
+
+#         print(response.text)
+#         return response.text
+
+# var = Tasty()
+# var.get_tasty_recipies()
+
+
+# cuisinelist = ['american', 'italian', 'asian', 'mexican', 'southern', 'french', 'southwestern',
+#             'barbecue-bbq', 'indian', 'chinese', 'cajun', 'mediterranean', 'greek', 'english',
+#             'spanish', 'thai', 'german', 'moroccan', 'irish', 'japanese', 'cuban', 
+#             'hawaiian', 'swedish', 'hungarian', 'portuguese']
+# resultsPerCuisine = 500
+
+# create wrapper function
+# def recipeOutputter(cuis):
+#     scuisine = '&allowedCuisine[]=cuisine^cuisine-' + cuis
+#     sresults = '&maxResult=' + str(resultsPerCuisine)
+    
+#     # retrieve and store results in a DataFrame
+#     r = (requests.get('http://api.yummly.com/v1/api/recipes?' + cykey + scuisine + sresults)).json()
+#     recipes = pd.DataFrame(r['matches'], columns = ['id', 'recipeName', 'rating', 'totalTimeInSeconds', 'ingredients'])
+    
+#     # extract course and cusine and add to DF
+#     course = []
+#     cuisine = []
+#     for i in r['matches']:
+#         course.append(i['attributes'].get('course', None))
+#         cuisine.append(i['attributes'].get('cuisine', None))
+#     recipes['course'] = course
+#     recipes['cuisine'] = cuisine
+    
+#     # rearrange DF
+#     recipes.set_index('id', inplace=True)
+#     col = ['recipeName', 'rating', 'totalTimeInSeconds', 'course', 'cuisine', 'ingredients']
+#     recipes=recipes[col]
+#     https://api.spoonacular.com/recipes/random?number=1&tags=vegetarian,dessert
