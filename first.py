@@ -183,7 +183,14 @@ class Tasty:
                         x = tag['display_name']
                         if x not in dict1:
                             dict1[x] = 0
-                        dict1[x] += 1 
+                        dict1[x] += 1
+                        break
+                    else:
+                        if tag['type'] == 'dietary':
+                            x = tag['display_name']
+                            if x not in dict1:
+                                dict1[x] = 0
+                            dict1[x] += 1 
             except:
                 x = "Cuisine not classified"     
                 if x not in dict1:
