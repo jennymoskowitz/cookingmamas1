@@ -161,10 +161,10 @@ class Spoonacular:
 #     https://api.spoonacular.com/recipes/random?number=1&tags=vegetarian,dessert
 
 class Tasty:
-    def get_tasty_recipies(self):
+    def get_tasty_recipes(self, cuisine):
         url = "https://tasty.p.rapidapi.com/recipes/list"
 
-        querystring = {"from":"0","sizes":"100"}
+        querystring = {"tags": cuisine, "from":"0","sizes":"100"}
 
         headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
 
@@ -172,9 +172,9 @@ class Tasty:
 
         return response
 
-    def get_dict(self):
+    def get_dict(self, cuisine):
         dict1 = {}
-        r = self.get_tasty_recipies()
+        r = self.get_tasty_recipes(cuisine)
         data = json.loads(r.text)
         for val in range(len(data['results'])):
             try:
@@ -199,5 +199,33 @@ class Tasty:
         print(dict1)
         return dict1
 
+    def setUpDatabase(self, db_name):
+        path = os.path.dirname(os.path.abspath(__file__))
+        conn = sqlite3.connect(path+'/'+db_name)
+        cur = conn.cursor()
+        return cur, conn
+    
+    def get_tasty_database(self, cuisine):
+        r = self.get_tasty_recipes(cuisine)
+        data = json.loads(r.text)
+        cur.execute("DROP TABLE IF EXISTS Tasty")
+        cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
+        for x in range(len(data['results'])):
+            recipe_id = data['results'][x]["id"]
+            name = data["results"][x]["seo_title"]
+            for tag in data['results'][x]["tags"]:
+                if tag['type'] == 'cuisine': 
+                    cuisine = tag['display_name']
+                    break
+                elif tag['type'] == 'dietary':
+                        cuisine = tag['display_name']
+                else:
+                    cuisine = "Cuisine not classified"
+            ingredients = []
+            for component in data['results'][x]["section"]:
+                ingredients.append(component['name'])
+            cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, ingredients))
+        conn.commit()
+
 var = Tasty()
-var.get_dict()
+var.get_dict("mexican")
