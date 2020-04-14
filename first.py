@@ -161,10 +161,10 @@ class Spoonacular:
 #     https://api.spoonacular.com/recipes/random?number=1&tags=vegetarian,dessert
 
 class Tasty:
-    def get_tasty_recipes(self, cuisine):
+    def get_tasty_recipes(self):
         url = "https://tasty.p.rapidapi.com/recipes/list"
 
-        querystring = {"tags": cuisine, "from":"0","sizes":"100"}
+        querystring = {"from":"0","sizes":"100"}
 
         headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
 
@@ -172,9 +172,9 @@ class Tasty:
 
         return response
 
-    def get_dict(self, cuisine):
+    def get_dict(self):
         dict1 = {}
-        r = self.get_tasty_recipes(cuisine)
+        r = self.get_tasty_recipes()
         data = json.loads(r.text)
         for val in range(len(data['results'])):
             try:
@@ -205,8 +205,8 @@ class Tasty:
         cur = conn.cursor()
         return cur, conn
     
-    def get_tasty_database(self, cuisine):
-        r = self.get_tasty_recipes(cuisine)
+    def get_tasty_database(self):
+        r = self.get_tasty_recipes()
         data = json.loads(r.text)
         cur.execute("DROP TABLE IF EXISTS Tasty")
         cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
@@ -224,8 +224,8 @@ class Tasty:
             ingredients = []
             for component in data['results'][x]["section"]:
                 ingredients.append(component['name'])
-            cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, ingredients))
+            cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
         conn.commit()
 
 var = Tasty()
-var.get_dict("mexican")
+var.get_dict()
