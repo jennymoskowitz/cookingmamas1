@@ -213,7 +213,7 @@ class Tasty:
 
     def setUpDatabase(self):
         path = os.path.dirname(os.path.abspath(__file__))
-        self.conn = sqlite3.connect(path+'/'+'Tasty.db')
+        self.conn = sqlite3.connect(path+'/'+'Cookingmamas.db')
         self.cur = self.conn.cursor()
         return self.cur, self.conn
     
