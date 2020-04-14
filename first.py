@@ -218,7 +218,7 @@ class Tasty:
                     cuisine = tag['display_name']
                     break
                 elif tag['type'] == 'dietary':
-                        cuisine = tag['display_name']
+                    cuisine = tag['display_name']
                 else:
                     cuisine = "Cuisine not classified"
             ingredients = []
