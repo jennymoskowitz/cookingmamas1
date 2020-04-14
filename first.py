@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import math
 import numpy as np
 import os
+import random
 
 
 #dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -163,69 +164,106 @@ class Spoonacular:
 class Tasty:
     def get_tasty_recipes(self):
         url = "https://tasty.p.rapidapi.com/recipes/list"
-
-        querystring = {"from":"0","sizes":"100"}
+        x = random.randrange(0, 40)
+        y = random.randrange(50, 300)
+        querystring = {"from": x,"sizes": y}
 
         headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
 
         response = requests.request("GET", url, headers=headers, params=querystring)
-
         return response
 
     def get_dict(self):
         dict1 = {}
-        r = self.get_tasty_recipes()
-        data = json.loads(r.text)
-        for val in range(len(data['results'])):
-            try:
-                for tag in data['results'][val]["tags"]:
-                    if tag['type'] == 'cuisine': 
-                        x = tag['display_name']
-                        if x not in dict1:
-                            dict1[x] = 0
-                        dict1[x] += 1
-                        break
-                    else:
-                        if tag['type'] == 'dietary':
+        list1 = []
+        a = self.get_tasty_recipes()
+        b = self.get_tasty_recipes()
+        c = self.get_tasty_recipes()
+        d = self.get_tasty_recipes()
+        e = self.get_tasty_recipes()
+        list1.append(a)
+        list1.append(b)
+        list1.append(c)
+        list1.append(d)
+        list1.append(e)
+        for var in list1:
+            data = json.loads(var.text)
+            for val in range(len(data['results'])):
+                try:
+                    for tag in data['results'][val]["tags"]:
+                        if tag['type'] == 'cuisine': 
                             x = tag['display_name']
                             if x not in dict1:
                                 dict1[x] = 0
-                            dict1[x] += 1 
-            except:
-                x = "Cuisine not classified"     
-                if x not in dict1:
-                    dict1[x] = 0
-                dict1[x] += 1   
+                            dict1[x] += 1
+                            break
+                        else:
+                            if tag['type'] == 'dietary':
+                                x = tag['display_name']
+                                if x not in dict1:
+                                    dict1[x] = 0
+                                dict1[x] += 1 
+                except:
+                    x = "Cuisine not classified"     
+                    if x not in dict1:
+                        dict1[x] = 0
+                    dict1[x] += 1   
         print(dict1)
         return dict1
 
-    def setUpDatabase(self, db_name):
+    def setUpDatabase(self):
         path = os.path.dirname(os.path.abspath(__file__))
-        conn = sqlite3.connect(path+'/'+db_name)
-        cur = conn.cursor()
-        return cur, conn
+        self.conn = sqlite3.connect(path+'/'+'Tasty.db')
+        self.cur = self.conn.cursor()
+        return self.cur, self.conn
     
     def get_tasty_database(self):
-        r = self.get_tasty_recipes()
-        data = json.loads(r.text)
-        cur.execute("DROP TABLE IF EXISTS Tasty")
-        cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
-        for x in range(len(data['results'])):
-            recipe_id = data['results'][x]["id"]
-            name = data["results"][x]["seo_title"]
-            for tag in data['results'][x]["tags"]:
-                if tag['type'] == 'cuisine': 
-                    cuisine = tag['display_name']
-                    break
-                elif tag['type'] == 'dietary':
-                    cuisine = tag['display_name']
-                else:
-                    cuisine = "Cuisine not classified"
-            ingredients = []
-            for component in data['results'][x]["section"]:
-                ingredients.append(component['name'])
-            cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
-        conn.commit()
+        list1 = []
+        a = self.get_tasty_recipes()
+        b = self.get_tasty_recipes()
+        c = self.get_tasty_recipes()
+        d = self.get_tasty_recipes()
+        e = self.get_tasty_recipes()
+        list1.append(a)
+        list1.append(b)
+        list1.append(c)
+        list1.append(d)
+        list1.append(e)
+        self.cur.execute("DROP TABLE IF EXISTS Tasty")
+        self.cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
+        for var in list1:
+            data = json.loads(var.text)
+            for x in range(len(data['results'])):
+                recipe_id = data['results'][x]["id"]
+                name = data["results"][x]["seo_title"]
+                for tag in data['results'][x]["tags"]:
+                    if tag['type'] == 'cuisine': 
+                        cuisine = tag['display_name']
+                        break
+                    elif tag['type'] == 'dietary':
+                        cuisine = tag['display_name']
+                    else:
+                        cuisine = "Cuisine not classified"
+                ingredients = []
+                for component in data['results'][x]["section"]:
+                    ingredients.append(component['name'])
+                self.cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+        self.conn.commit()
+
+
+
+    def visualization(self):
+        r = Tasty()
+        dict1 = r.get_dict()
+        fig = plt.figure(figsize = (10, 5))
+        ax1 = fig.add_subplot(121)
+        ax1.bar([1,2,3], [3,4,5])
+        names = dict1.keys()
+        values = dict1.values()
+        plt.bar(names, values)
+        plt.suptitle("Top Cuisines")
+        plt.show()
+
 
 var = Tasty()
-var.get_dict()
+var.visualization()
