@@ -181,11 +181,21 @@ class Tasty:
         c = self.get_tasty_recipes()
         d = self.get_tasty_recipes()
         e = self.get_tasty_recipes()
+        f = self.get_tasty_recipes()
+        g = self.get_tasty_recipes()
+        h = self.get_tasty_recipes()
+        i = self.get_tasty_recipes()
+        j = self.get_tasty_recipes()
         list1.append(a)
         list1.append(b)
         list1.append(c)
         list1.append(d)
         list1.append(e)
+        list1.append(f)
+        list1.append(g)
+        list1.append(h)
+        list1.append(i)
+        list1.append(j)
         for var in list1:
             data = json.loads(var.text)
             for val in range(len(data['results'])):
@@ -196,13 +206,13 @@ class Tasty:
                             if x not in dict1:
                                 dict1[x] = 0
                             dict1[x] += 1
-                            break
-                        else:
-                            if tag['type'] == 'dietary':
-                                x = tag['display_name']
-                                if x not in dict1:
-                                    dict1[x] = 0
-                                dict1[x] += 1 
+                        #     break
+                        # else:
+                        #     if tag['type'] == 'dietary':
+                        #         x = tag['display_name']
+                        #         if x not in dict1:
+                        #             dict1[x] = 0
+                        #         dict1[x] += 1 
                 except:
                     x = "Cuisine not classified"     
                     if x not in dict1:
@@ -266,4 +276,4 @@ class Tasty:
 
 
 var = Tasty()
-var.visualization()
+var.get_dict()
