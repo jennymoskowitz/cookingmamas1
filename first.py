@@ -41,70 +41,81 @@ import re
 #         json.dump(CACHE_DICT, f)
 
 
-# #Spoonacular 
-# #get recipies
-# class Spoonacular:
+class Spoonacular:
 
-#     def get_recipies(self):
-#         url = 'https://api.spoonacular.com/recipes/random'
-#         params = {"apiKey" : '3adec4cbad224f2c9596d4c011d346fc', "number" : "100"}
-#         response = requests.request("GET", url, params = params)
-#         print(response.text)
-#         #data = json.loads(r.text)
-#         return response
+    def get_recipies(self):
+        url = 'https://api.spoonacular.com/recipes/random'
+        params = {"apiKey" : '3adec4cbad224f2c9596d4c011d346fc', "number" : "100"}
+        response = requests.request("GET", url, params = params)
 
-#     def get_dict(self):
-#         dict1 = {}
-#         r = self.get_recipies()
-#         data = json.loads(r.text)
-#         print(data)
-#         for x in range(len(data['recipes'])):
-#             if len(data['recipes'][x]['cuisines']) > 0:
-#                 if data['recipes'][x]['cuisines'][0] not in dict1:
-#                     dict1[data['recipes'][x]['cuisines'][0]] = 0
-#                 dict1[data['recipes'][x]['cuisines'][0]] += 1
-#             else:
-#                 print("Cuisine not found.")
-#         print(dict1)
-#         sorted_dict = sorted(dict1.items(), key = lambda t: t[1], reverse = True)
-#         l = []
-#         for tup in sorted_dict:
-#             l.append(tup[0])
-#         print(l)
-#         return l
+        #data = json.loads(r.text)
+        return response
+
+    def get_dict(self):
+        dict1 = {}
+        r = self.get_recipies()
+        data = json.loads(r.text)
+        print(data)
+        for x in range(len(data['recipes'])):
+            if len(data['recipes'][x]['cuisines']) > 0:
+                if data['recipes'][x]['cuisines'][0] not in dict1:
+                    dict1[data['recipes'][x]['cuisines'][0]] = 0
+                dict1[data['recipes'][x]['cuisines'][0]] += 1
+            else:
+                print("Cuisine not found.")
+        print(dict1)
+        # sorted_dict = sorted(dict1.items(), key = lambda t: t[1], reverse = True)
+        # l = []
+        # for tup in sorted_dict:
+        #     l.append(tup[0])
+        # print(l)
+        return dict1.keys()
     
-#     def get_tasty_recipes(self, cuisine):
-#         url = "https://tasty.p.rapidapi.com/recipes/list"
-#         # x = random.randrange(0, 40)
-#         # y = random.randrange(50, 300)
+    def get_tasty_recipes(self, cuisine):
+        url = "https://tasty.p.rapidapi.com/recipes/list"
+        # x = random.randrange(0, 40)
+        # y = random.randrange(50, 300)
  
 
-#         querystring = {"tags": cuisine, "from": 0,"sizes": 20}
+        querystring = {"tags": cuisine, "from": 0,"sizes": 20}
 
-#         headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
+        headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
 
-#         response = requests.request("GET", url, headers=headers, params=querystring)
-#         print(response.text)
-#         return response
+        response = requests.request("GET", url, headers=headers, params=querystring)
+
+        return response
 
 
-#     def get_ingredients(self, recipes):
-#         ingredients = []
-#         for var in recipes:
-#             data = json.loads(var.text)
-#             for component in data['results'][x]["section"]:
-#                 ingredients.append(component['name'])
+    def get_ingredients(self, cuisine):
+        cuisine_ingredients = []
+        ingredients = []
+        r = self.get_tasty_recipes(cuisine)
+        data = json.loads(r.text)
+        for x in range(len(data['results'])):
+            try:
+                for num in range(len(data['results'][x]['sections'])):
+                    for n in range(len(data['results'][x]['sections'][num]['components'])):
+                        ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
+            except:
+                for num in range(len(data['results'][x]["recipes"])):
+                    for n in range(len(data['results'][x]["recipes"][num]['sections'])):
+                        for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
+                            ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
+
+            cuisine_ingredients.append(ingredients)
+        print(cuisine_ingredients)
+        return cuisine_ingredients
         
-# # sorted dictionary top 3 cuisines
+# sorted dictionary top 3 cuisines
  
 
                     
 
-# v = Spoonacular()
-# j = v.get_dict()
-# for rec in j:
-#     r = rec[0].lower() + rec[1:]
-#     v.get_tasty_recipes(r)
+v = Spoonacular()
+cuisines = v.get_dict()
+for rec in cuisines:
+    r = rec[0].lower() + rec[1:]
+    tasty = v.get_ingredients(r)
 
 
 
