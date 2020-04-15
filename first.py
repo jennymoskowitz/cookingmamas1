@@ -173,29 +173,16 @@ class Tasty:
         response = requests.request("GET", url, headers=headers, params=querystring)
         return response
 
+    def get_list(self):
+        list1 = []
+        for x in range(5):
+            var = self.get_tasty_recipes()
+            list1.append(var)
+        return list1
+
     def get_dict(self):
         dict1 = {}
-        list1 = []
-        a = self.get_tasty_recipes()
-        b = self.get_tasty_recipes()
-        c = self.get_tasty_recipes()
-        d = self.get_tasty_recipes()
-        e = self.get_tasty_recipes()
-        f = self.get_tasty_recipes()
-        g = self.get_tasty_recipes()
-        h = self.get_tasty_recipes()
-        i = self.get_tasty_recipes()
-        j = self.get_tasty_recipes()
-        list1.append(a)
-        list1.append(b)
-        list1.append(c)
-        list1.append(d)
-        list1.append(e)
-        list1.append(f)
-        list1.append(g)
-        list1.append(h)
-        list1.append(i)
-        list1.append(j)
+        list1 = self.get_list()
         for var in list1:
             data = json.loads(var.text)
             for val in range(len(data['results'])):
@@ -228,17 +215,7 @@ class Tasty:
         return self.cur, self.conn
     
     def get_tasty_database(self):
-        list1 = []
-        a = self.get_tasty_recipes()
-        b = self.get_tasty_recipes()
-        c = self.get_tasty_recipes()
-        d = self.get_tasty_recipes()
-        e = self.get_tasty_recipes()
-        list1.append(a)
-        list1.append(b)
-        list1.append(c)
-        list1.append(d)
-        list1.append(e)
+        list1 = self.get_list()
         self.cur.execute("DROP TABLE IF EXISTS Tasty")
         self.cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
         for var in list1:
