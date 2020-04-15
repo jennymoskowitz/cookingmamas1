@@ -1,4 +1,5 @@
 import requests
+from bs4 import BeautifulSoup
 import json
 import sqlite3
 import matplotlib
@@ -7,6 +8,10 @@ import math
 import numpy as np
 import os
 import random
+import re
+
+
+
 
 
 #dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -61,34 +66,71 @@ class Spoonacular:
             else:
                 print("Cuisine not found.")
         print(dict1)
-        return dict1
+        sorted_dict = sorted(dict1.items(), key = lambda t: t[1], reverse = True)
+        l = []
+        for tup in sorted_dict:
+            l.append(tup[0])
+        print(l)
+        return l
+    
+    def get_tasty_recipes(self, cuisine):
+        url = "https://tasty.p.rapidapi.com/recipes/list"
+        # x = random.randrange(0, 40)
+        # y = random.randrange(50, 300)
+ 
 
+        querystring = {"tags": cuisine, "from": 0,"sizes": 20}
+
+        headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
+
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        print(response.text)
+        return response
+
+
+    def get_ingredients(self, recipes):
+        ingredients = []
+        for var in recipes:
+            data = json.loads(var.text)
+            for component in data['results'][x]["section"]:
+                ingredients.append(component['name'])
+        
+# sorted dictionary top 3 cuisines
+ 
 
                     
 
 v = Spoonacular()
-v.get_dict()
+j = v.get_dict()
+for rec in j:
+    r = rec[0].lower() + rec[1:]
+    v.get_tasty_recipes(r)
+
 
 
 
 class Tasty:
-    def get_tasty_recipes(self):
+    # cuisines from spoonacular 
+    def get_tasty_recipes(self, cuisine):
         url = "https://tasty.p.rapidapi.com/recipes/list"
-        x = random.randrange(0, 40)
-        y = random.randrange(50, 300)
-        querystring = {"from": x,"sizes": y}
+        # x = random.randrange(0, 40)
+        # y = random.randrange(50, 300)
+ 
+
+        querystring = {"tags": cuisine, "from": 0,"sizes": 20}
 
         headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
 
         response = requests.request("GET", url, headers=headers, params=querystring)
         return response
 
-    def get_list(self):
-        list1 = []
-        for x in range(5):
-            var = self.get_tasty_recipes()
-            list1.append(var)
-        return list1
+
+    # def get_list(self):
+    #     list1 = []
+    #     for x in range(5):
+    #         var = self.get_tasty_recipes()
+    #         list1.append(var)
+    #     return list1
 
     def get_dict(self):
         dict1 = {}
@@ -118,16 +160,16 @@ class Tasty:
         print(dict1)
         return dict1
 
-    def setUpDatabase(self):
+    def set_up_database(self, db_name):
         path = os.path.dirname(os.path.abspath(__file__))
-        self.conn = sqlite3.connect(path+'/'+'Cookingmamas.db')
-        self.cur = self.conn.cursor()
-        return self.cur, self.conn
+        conn = sqlite3.connect(path+'/'+db_name)
+        cur = conn.cursor()
+        return cur, conn
     
-    def get_tasty_database(self):
+    def get_tasty_database(self, cur, conn):
         list1 = self.get_list()
-        self.cur.execute("DROP TABLE IF EXISTS Tasty")
-        self.cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
+        cur.execute("DROP TABLE IF EXISTS Tasty")
+        cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
         for var in list1:
             data = json.loads(var.text)
             for x in range(len(data['results'])):
@@ -144,8 +186,8 @@ class Tasty:
                 ingredients = []
                 for component in data['results'][x]["section"]:
                     ingredients.append(component['name'])
-                self.cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
-        self.conn.commit()
+                cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+        conn.commit()
 
 
 
@@ -162,5 +204,16 @@ class Tasty:
         plt.show()
 
 
+# n = Tasty()
+# try:
+#     path = os.path.dirname(os.path.abspath(__file__))
+#     f = open(path + "/Cookingmamas.db")
+#     conn = sqlite3.connect(f)
+#     cur = conn.cursor()
+# except:
+#     cur, conn = n.set_up_database("Cookingmamas.db")
+
+
+# n.get_tasty_database(cur, conn)
 
 
