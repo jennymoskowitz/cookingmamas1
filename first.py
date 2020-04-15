@@ -42,7 +42,7 @@ class Spoonacular:
 
     def get_recipies(self):
         url = 'https://api.spoonacular.com/recipes/random'
-        params = {"apiKey" : '3adec4cbad224f2c9596d4c011d346fc', "number" : "1"}
+        params = {"apiKey" : '3adec4cbad224f2c9596d4c011d346fc', "number" : "100"}
         response = requests.request("GET", url, params = params)
         print(response.text)
         #data = json.loads(r.text)
@@ -54,20 +54,20 @@ class Spoonacular:
         data = json.loads(r.text)
         print(data)
         for x in range(len(data['recipes'])):
-            try:
-                if len(data['recipes'][x]['cuisines']) > 0:
-                    if data['recipes'][x]['cuisines'][0] not in dict1:
-                        dict1[data['recipes'][x]['cuisines'][0]] = 0
-                    dict1[data['recipes'][x]['cuisines'][0]] += 1
-                else:
-                    print("Cuisine not found.")
+            if len(data['recipes'][x]['cuisines']) > 0:
+                if data['recipes'][x]['cuisines'][0] not in dict1:
+                    dict1[data['recipes'][x]['cuisines'][0]] = 0
+                dict1[data['recipes'][x]['cuisines'][0]] += 1
+            else:
+                print("Cuisine not found.")
+        print(dict1)
+        return dict1
 
 
                     
 
-
-    #   
-
+v = Spoonacular()
+v.get_dict()
 
 
 
@@ -164,5 +164,3 @@ class Tasty:
 
 
 
-var = Tasty()
-var.get_dict()
