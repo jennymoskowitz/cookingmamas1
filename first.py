@@ -88,10 +88,10 @@ class Spoonacular:
 
     def get_ingredients(self, cuisine):
         cuisine_ingredients = []
-        ingredients = []
         r = self.get_tasty_recipes(cuisine)
         data = json.loads(r.text)
         for x in range(len(data['results'])):
+            ingredients = []
             try:
                 for num in range(len(data['results'][x]['sections'])):
                     for n in range(len(data['results'][x]['sections'][num]['components'])):
@@ -101,7 +101,6 @@ class Spoonacular:
                     for n in range(len(data['results'][x]["recipes"][num]['sections'])):
                         for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
                             ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-
             cuisine_ingredients.append(ingredients)
         print(cuisine_ingredients)
         return cuisine_ingredients
@@ -285,9 +284,9 @@ class Edamam:
        
 
 
-g = Edamam()
-g.get_carbs(['1 teaspoon garlic powder', '1 teaspoon salt', '1 ½ cups crema table cream', '24 soft corn tortillas', 'Oil for frying', 'Crema', 'Cilantro', 'Cotija cheese', 'Avocado'])
-g.get_fiber(['1 teaspoon garlic powder', '1 teaspoon salt', '1 ½ cups crema table cream', '24 soft corn tortillas', 'Oil for frying', 'Crema', 'Cilantro', 'Cotija cheese', 'Avocado'])
+# g = Edamam()
+# g.get_carbs(['1 teaspoon garlic powder', '1 teaspoon salt', '1 ½ cups crema table cream', '24 soft corn tortillas', 'Oil for frying', 'Crema', 'Cilantro', 'Cotija cheese', 'Avocado'])
+# g.get_fiber(['1 teaspoon garlic powder', '1 teaspoon salt', '1 ½ cups crema table cream', '24 soft corn tortillas', 'Oil for frying', 'Crema', 'Cilantro', 'Cotija cheese', 'Avocado'])
 
 
 
