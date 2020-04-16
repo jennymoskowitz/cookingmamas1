@@ -402,8 +402,20 @@ def main():
 
     # for loop through the different cuisines
     for rec in cuisines:
-        # make the first letter lower case in the cuisine in order to input it into the next api
-        r = rec[0].lower() + rec[1:]
+        # change the format to put in the next api
+        # if the cuisine has two words
+        if ' ' in rec:
+            # split the two names and make the first letter of each lower case and then join
+            # them with a _
+            name_list = []
+            split_name = rec.split(" ")
+            for word in split_name:
+                name = word[0].lower() + word[1:]
+                name_list.append(name)
+                r = ('_').join(name_list)
+        else:
+            # make the first letter lower case in the cuisine in order to input it into the next api
+            r = rec[0].lower() + rec[1:]
         # input the cuisine into the tasty api and output a list of ingredients for each recipie for the cuisine
         tasty = v.get_ingredients(r)
         #set up or accumulate to the tasty table
