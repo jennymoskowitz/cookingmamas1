@@ -41,14 +41,19 @@ import re
 #         json.dump(CACHE_DICT, f)
 
 
-class Spoonacular:
+class Recipies:
+
+    def set_up_recipie_database(self, db_name):
+        path = os.path.dirname(os.path.abspath(__file__))
+        conn = sqlite3.connect(path+'/'+db_name)
+        cur = conn.cursor()
+        return cur, conn
 
     def get_recipies(self):
         url = 'https://api.spoonacular.com/recipes/random'
         params = {"apiKey" : '3adec4cbad224f2c9596d4c011d346fc', "number" : "100"}
         response = requests.request("GET", url, params = params)
 
-        #data = json.loads(r.text)
         return response
 
     def get_dict(self):
@@ -73,10 +78,7 @@ class Spoonacular:
     
     def get_tasty_recipes(self, cuisine):
         url = "https://tasty.p.rapidapi.com/recipes/list"
-        # x = random.randrange(0, 40)
-        # y = random.randrange(50, 300)
  
-
         querystring = {"tags": cuisine, "from": 0,"sizes": 20}
 
         headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
@@ -104,13 +106,100 @@ class Spoonacular:
             cuisine_ingredients.append(ingredients)
         print(cuisine_ingredients)
         return cuisine_ingredients
-        
-# sorted dictionary top 3 cuisines
- 
 
-                    
+    def get_tasty_database(self, cuisine, cur, conn):
+        r = self.get_tasty_recipes(cuisine)
+        data = json.loads(r.text)
+        cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Tasty' ''')
+        if cur.fetchone()[0]==1:
+            for x in range(len(data['results'])):
+                recipe_id = data['results'][x]["id"]
+                name = data["results"][x]["seo_title"]
+                for tag in data['results'][x]["tags"]:
+                    if tag['type'] == 'cuisine': 
+                        cuisine = tag['display_name']
+                        break
+                    else:
+                        cuisine = "Cuisine not classified"
+                ingredients = []
+                try:
+                    for num in range(len(data['results'][x]['sections'])):
+                        for n in range(len(data['results'][x]['sections'][num]['components'])):
+                            ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
+                except:
+                    for num in range(len(data['results'][x]["recipes"])):
+                        for n in range(len(data['results'][x]["recipes"][num]['sections'])):
+                            for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
+                                ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
+                cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+            conn.commit()
+        else:
+            cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
+            for x in range(len(data['results'])):
+                recipe_id = data['results'][x]["id"]
+                name = data["results"][x]["seo_title"]
+                for tag in data['results'][x]["tags"]:
+                    if tag['type'] == 'cuisine': 
+                        cuisine = tag['display_name']
+                        break
+                    elif tag['type'] == 'dietary':
+                        cuisine = tag['display_name']
+                    else:
+                        cuisine = "Cuisine not classified"
+                ingredients = []
+                try:
+                    for num in range(len(data['results'][x]['sections'])):
+                        for n in range(len(data['results'][x]['sections'][num]['components'])):
+                            ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
+                except:
+                    for num in range(len(data['results'][x]["recipes"])):
+                        for n in range(len(data['results'][x]["recipes"][num]['sections'])):
+                            for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
+                                ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
+                cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+            conn.commit()
+    
 
-v = Spoonacular()
+    def get_spoon_database(self, cur, conn):
+        r = self.get_recipies()
+        data = json.loads(r.text)
+        cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Spoonacular' ''')
+        if cur.fetchone()[0]==1:
+            for x in range(len(data['recipes'])):
+                recipe_id = data['recipes'][x]["id"]
+                name = data['recipes'][x]['title']
+                if len(data['recipes'][x]['cuisines']) > 0:
+                    cuisine = data['recipes'][x]['cuisines'][0]
+            
+                else:
+                    cuisine = "Cuisine not classified"
+                ingredients = []
+                for num in range(len(data['recipes'][x]['analyzedInstructions'])):
+                    for n in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'])):
+                        for j in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'])):
+                            ingredients.append(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'][j]['name'])
+                cur.execute('''INSERT INTO Spoonacular (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+            conn.commit()
+        else:
+            cur.execute('''CREATE TABLE Spoonacular (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
+            for x in range(len(data['recipes'])):
+                recipe_id = data['recipes'][x]["id"]
+                name = data['recipes'][x]['title']
+                if len(data['recipes'][x]['cuisines']) > 0:
+                    cuisine = data['recipes'][x]['cuisines'][0]
+            
+                else:
+                    cuisine = "Cuisine not classified"
+            ingredients = []
+            for num in range(len(data['recipes'][x]['analyzedInstructions'])):
+                for n in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'])):
+                    for j in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'])):
+                        ingredients.append(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'][j]['name'])
+                cur.execute('''INSERT INTO Spoonacular (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+            conn.commit()
+    
+
+v = Recipies()
 cuisines = v.get_dict()
 for rec in cuisines:
     r = rec[0].lower() + rec[1:]
@@ -176,28 +265,28 @@ for rec in cuisines:
 #         cur = conn.cursor()
 #         return cur, conn
     
-#     def get_tasty_database(self, cur, conn):
-#         list1 = self.get_list()
-#         cur.execute("DROP TABLE IF EXISTS Tasty")
-#         cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
-#         for var in list1:
-#             data = json.loads(var.text)
-#             for x in range(len(data['results'])):
-#                 recipe_id = data['results'][x]["id"]
-#                 name = data["results"][x]["seo_title"]
-#                 for tag in data['results'][x]["tags"]:
-#                     if tag['type'] == 'cuisine': 
-#                         cuisine = tag['display_name']
-#                         break
-#                     elif tag['type'] == 'dietary':
-#                         cuisine = tag['display_name']
-#                     else:
-#                         cuisine = "Cuisine not classified"
-#                 ingredients = []
-#                 for component in data['results'][x]["section"]:
-#                     ingredients.append(component['name'])
-#                 cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
-#         conn.commit()
+    # def get_tasty_database(self, cur, conn):
+    #     list1 = self.get_list()
+    #     cur.execute("DROP TABLE IF EXISTS Tasty")
+    #     cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
+    #     for var in list1:
+    #         data = json.loads(var.text)
+    #         for x in range(len(data['results'])):
+    #             recipe_id = data['results'][x]["id"]
+    #             name = data["results"][x]["seo_title"]
+    #             for tag in data['results'][x]["tags"]:
+    #                 if tag['type'] == 'cuisine': 
+    #                     cuisine = tag['display_name']
+    #                     break
+    #                 elif tag['type'] == 'dietary':
+    #                     cuisine = tag['display_name']
+    #                 else:
+    #                     cuisine = "Cuisine not classified"
+    #             ingredients = []
+    #             for component in data['results'][x]["section"]:
+    #                 ingredients.append(component['name'])
+    #             cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+    #     conn.commit()
 
 
 
