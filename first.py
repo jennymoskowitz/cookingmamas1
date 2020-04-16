@@ -132,7 +132,7 @@ class Recipies:
                         for n in range(len(data['results'][x]["recipes"][num]['sections'])):
                             for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
                                 ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, c, str(ingredients)))
+                cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, c, str(ingredients)))
             conn.commit()
         else:
             cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingredients TEXT)''')
@@ -156,7 +156,7 @@ class Recipies:
                         for n in range(len(data['results'][x]["recipes"][num]['sections'])):
                             for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
                                 ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, c, str(ingredients)))
+                cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, c, str(ingredients)))
             conn.commit()
     
 
@@ -178,7 +178,7 @@ class Recipies:
                     for n in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'])):
                         for j in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'])):
                             ingredients.append(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'][j]['name'])
-                cur.execute('''INSERT INTO Spoonacular (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+                cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
             conn.commit()
         else:
             cur.execute('''CREATE TABLE Spoonacular (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingredients TEXT)''')
@@ -195,7 +195,7 @@ class Recipies:
                 for n in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'])):
                     for j in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'])):
                         ingredients.append(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'][j]['name'])
-                cur.execute('''INSERT INTO Spoonacular (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+                cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
             conn.commit()
     
 
