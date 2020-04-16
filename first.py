@@ -115,12 +115,13 @@ class Recipies:
             for x in range(len(data['results'])):
                 recipe_id = data['results'][x]["id"]
                 name = data["results"][x]["seo_title"]
-                for tag in data['results'][x]["tags"]:
-                    if tag['type'] == 'cuisine': 
-                        cuisine = tag['display_name']
-                        break
-                    else:
-                        cuisine = "Cuisine not classified"
+                c = cuisine
+                # for tag in data['results'][x]["tags"]:
+                #     if tag['type'] == 'cuisine': 
+                #         cuisine = tag['display_name']
+                #         break
+                #     else:
+                #         cuisine = "Cuisine not classified"
                 ingredients = []
                 try:
                     for num in range(len(data['results'][x]['sections'])):
@@ -131,21 +132,20 @@ class Recipies:
                         for n in range(len(data['results'][x]["recipes"][num]['sections'])):
                             for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
                                 ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+                cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, c, str(ingredients)))
             conn.commit()
         else:
-            cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
+            cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingredients TEXT)''')
             for x in range(len(data['results'])):
                 recipe_id = data['results'][x]["id"]
                 name = data["results"][x]["seo_title"]
-                for tag in data['results'][x]["tags"]:
-                    if tag['type'] == 'cuisine': 
-                        cuisine = tag['display_name']
-                        break
-                    elif tag['type'] == 'dietary':
-                        cuisine = tag['display_name']
-                    else:
-                        cuisine = "Cuisine not classified"
+                c = cuisine
+                # for tag in data['results'][x]["tags"]:
+                #     if tag['type'] == 'cuisine': 
+                #         cuisine = tag['display_name']
+                #         break
+                #     else:
+                #         cuisine = "Cuisine not classified"
                 ingredients = []
                 try:
                     for num in range(len(data['results'][x]['sections'])):
@@ -156,7 +156,7 @@ class Recipies:
                         for n in range(len(data['results'][x]["recipes"][num]['sections'])):
                             for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
                                 ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+                cur.execute('''INSERT INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, c, str(ingredients)))
             conn.commit()
     
 
@@ -181,7 +181,7 @@ class Recipies:
                 cur.execute('''INSERT INTO Spoonacular (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
             conn.commit()
         else:
-            cur.execute('''CREATE TABLE Spoonacular (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingregients TEXT,)''')
+            cur.execute('''CREATE TABLE Spoonacular (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingredients TEXT)''')
             for x in range(len(data['recipes'])):
                 recipe_id = data['recipes'][x]["id"]
                 name = data['recipes'][x]['title']
@@ -199,11 +199,11 @@ class Recipies:
             conn.commit()
     
 
-v = Recipies()
-cuisines = v.get_dict()
-for rec in cuisines:
-    r = rec[0].lower() + rec[1:]
-    tasty = v.get_ingredients(r)
+# v = Recipies()
+# cuisines = v.get_dict()
+# for rec in cuisines:
+#     r = rec[0].lower() + rec[1:]
+#     tasty = v.get_ingredients(r)
 
 
 
@@ -379,32 +379,33 @@ class Edamam:
 
 
 
-def main():
-    # Recipies object
-    v = Recipies()
+#def main():
+# Recipies object
+v = Recipies()
 
-    #see if Cookingmamas.db exists already, if yes, open and append to it
-    #if no, create Cookingmamas.db
-    try:
-        path = os.path.dirname(os.path.abspath(__file__))
-        f = open(path + "/Cookingmamas.db")
-        conn = sqlite3.connect(f)
-        cur = conn.cursor()
-    except:
-        cur, conn = v.set_up_recipie_database("Cookingmamas.db")
+#see if Cookingmamas.db exists already, if yes, open and append to it
+#if no, create Cookingmamas.db
+try:
+    path = os.path.dirname(os.path.abspath(__file__))
+    f = open(path + "/Cookingmamas.db")
+    conn = sqlite3.connect(f)
+    cur = conn.cursor()
+except:
+    cur, conn = v.set_up_recipie_database("Cookingmamas.db")
 
-    # get recipies from spoonacular and then get a dictionary of the different cuisines and the amount of recipies
-    # that have each then return a list of the cuisines
-    cuisines = v.get_dict()
+# get recipies from spoonacular and then get a dictionary of the different cuisines and the amount of recipies
+# that have each then return a list of the cuisines
+cuisines = v.get_dict()
 
-    #set up or accumulate to the spoonacular table
-    v.get_spoon_database(cur, conn)
+#set up or accumulate to the spoonacular table
+v.get_spoon_database(cur, conn)
 
-    # for loop through the different cuisines
-    for rec in cuisines:
-        # make the first letter lower case in the cuisine in order to input it into the next api
-        r = rec[0].lower() + rec[1:]
-        # input the cuisine into the tasty api and output a list of ingredients for each recipie for the cuisine
-        tasty = v.get_ingredients(r)
-        #set up or accumulate to the tasty table
-        v.get_tasty_database(r, cur, conn)
+# for loop through the different cuisines
+for rec in cuisines:
+    # make the first letter lower case in the cuisine in order to input it into the next api
+    r = rec[0].lower() + rec[1:]
+    # input the cuisine into the tasty api and output a list of ingredients for each recipie for the cuisine
+    tasty = v.get_ingredients(r)
+    #set up or accumulate to the tasty table
+    v.get_tasty_database(r, cur, conn)
+
