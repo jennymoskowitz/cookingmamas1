@@ -379,33 +379,33 @@ class Edamam:
 
 
 
-#def main():
-# Recipies object
-v = Recipies()
+def main():
+    # Recipies object
+    v = Recipies()
 
-#see if Cookingmamas.db exists already, if yes, open and append to it
-#if no, create Cookingmamas.db
-try:
-    path = os.path.dirname(os.path.abspath(__file__))
-    f = open(path + "/Cookingmamas.db")
-    conn = sqlite3.connect(f)
-    cur = conn.cursor()
-except:
-    cur, conn = v.set_up_recipie_database("Cookingmamas.db")
+    #see if Cookingmamas.db exists already, if yes, open and append to it
+    #if no, create Cookingmamas.db
+    try:
+        path = os.path.dirname(os.path.abspath(__file__))
+        f = open(path + "/Cookingmamas.db")
+        conn = sqlite3.connect(f)
+        cur = conn.cursor()
+    except:
+        cur, conn = v.set_up_recipie_database("Cookingmamas.db")
 
-# get recipies from spoonacular and then get a dictionary of the different cuisines and the amount of recipies
-# that have each then return a list of the cuisines
-cuisines = v.get_dict()
+    # get recipies from spoonacular and then get a dictionary of the different cuisines and the amount of recipies
+    # that have each then return a list of the cuisines
+    cuisines = v.get_dict()
 
-#set up or accumulate to the spoonacular table
-v.get_spoon_database(cur, conn)
+    #set up or accumulate to the spoonacular table
+    v.get_spoon_database(cur, conn)
 
-# for loop through the different cuisines
-for rec in cuisines:
-    # make the first letter lower case in the cuisine in order to input it into the next api
-    r = rec[0].lower() + rec[1:]
-    # input the cuisine into the tasty api and output a list of ingredients for each recipie for the cuisine
-    tasty = v.get_ingredients(r)
-    #set up or accumulate to the tasty table
-    v.get_tasty_database(r, cur, conn)
+    # for loop through the different cuisines
+    for rec in cuisines:
+        # make the first letter lower case in the cuisine in order to input it into the next api
+        r = rec[0].lower() + rec[1:]
+        # input the cuisine into the tasty api and output a list of ingredients for each recipie for the cuisine
+        tasty = v.get_ingredients(r)
+        #set up or accumulate to the tasty table
+        v.get_tasty_database(r, cur, conn)
 
