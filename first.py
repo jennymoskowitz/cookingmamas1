@@ -114,8 +114,19 @@ class Recipies:
         if cur.fetchone()[0]==1:
             for x in range(len(data['results'])):
                 recipe_id = data['results'][x]["id"]
-                name = data["results"][x]["seo_title"]
-                c = cuisine
+                try:
+                    name = data["results"][x]["seo_title"]
+                except:
+                    name = data["results"][x]["name"]
+                if "_" in cuisine:
+                    join_word = []
+                    split_cuisine = cuisine.split("_")
+                    for word in split_cuisine:
+                        w = word[0].upper() + word[1:]
+                        join_word.append(w)
+                    c = (" ").join(join_word)
+                else:
+                    c = cuisine[0].upper() + cuisine[1:]
                 # for tag in data['results'][x]["tags"]:
                 #     if tag['type'] == 'cuisine': 
                 #         cuisine = tag['display_name']
@@ -138,8 +149,19 @@ class Recipies:
             cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingredients TEXT)''')
             for x in range(len(data['results'])):
                 recipe_id = data['results'][x]["id"]
-                name = data["results"][x]["seo_title"]
-                c = cuisine
+                try:
+                    name = data["results"][x]["seo_title"]
+                except:
+                    name = data["results"][x]["name"]
+                if "_" in cuisine:
+                    join_word = []
+                    split_cuisine = cuisine.split("_")
+                    for word in split_cuisine:
+                        w = word[0].upper() + word[1:]
+                        join_word.append(w)
+                    c = (" ").join(join_word)
+                else:
+                    c = cuisine[0].upper() + cuisine[1:]
                 # for tag in data['results'][x]["tags"]:
                 #     if tag['type'] == 'cuisine': 
                 #         cuisine = tag['display_name']
@@ -421,3 +443,5 @@ def main():
         #set up or accumulate to the tasty table
         v.get_tasty_database(r, cur, conn)
 
+if __name__ == "__main__":
+    main()
