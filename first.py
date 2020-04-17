@@ -23,7 +23,7 @@ class Recipies:
         return cur, conn
 
     #input: none
-    #output: none
+    #output: return the 
     #goes through the Spoonacular API to find 100 random recipies
     def get_recipies(self):
         url = 'https://api.spoonacular.com/recipes/random'
@@ -33,8 +33,8 @@ class Recipies:
         return response
 
     #input: none
-    #output: none
-    # goes through the recipies returned from the Spoonacular API and makes a dictionary of the cuisines found.
+    #output: returning the dictionary keys
+    #goes through the recipies returned from the Spoonacular API and makes a dictionary of the cuisines found.
     def get_dict(self):
         dict1 = {}
         r = self.get_recipies()
@@ -298,28 +298,70 @@ class Recipies:
     #goes through the Edamam API to find the nutritional data of a given list of ingredients from get_ingredients.
     def get_nutrient_data(self, ingredients):
         url = "https://api.edamam.com/api/nutrition-data"
+        lst = []
 
-        querystring = {"app_id": "e29147b2", "app_key": "b34772921762c60de0b5875b765b707a", "ingr": ingredients}
+        for ingredient in ingredients:
+            new_lst = []
+            new_lst.append(ingredient)
+    
+            querystring = {"app_id": "e29147b2", "app_key": "b34772921762c60de0b5875b765b707a", "ingr": new_lst}
 
-        response = requests.request("GET", url, params=querystring)
+            response = requests.request("GET", url, params=querystring)
+            response1 = json.loads(response.text)
+            lst.append(response1)
 
-        print(response.text)
+        return lst
+    
+    # def get_nutrient_data(self, ingredients):
+    #     url = "https://api.edamam.com/api/nutrition-data"
+    #     querystring = {"app_id": "e29147b2", "app_key": "b34772921762c60de0b5875b765b707a", "ingr": ingredients}
 
-        return response
+    #     response = requests.request("GET", url, params=querystring)
+            
+    #     print(response.text)
+    #     return response
+
+
     
     #input: ingredients 
     #output: none
     #goes through the edamam database to find the total carbs for a given ingredients list.
+    
     def get_carbs(self, ingredients):
         count = 0
         r = self.get_nutrient_data(ingredients)
-        data = json.loads(r.text)
-        carb_units = data['totalNutrients']["CHOCDF"]['unit']
-        for ingredient in ingredients:
-            carb_quantity = data['totalNutrients']["CHOCDF"]['quantity']
-            count += carb_quantity
+        for item in range(len(r)):
+            if r[item]['totalNutrients'] != {}:
+                carb_quan = r[item]['totalNutrients']["CHOCDF"]["quantity"]
+                count += carb_quan
+            else:
+                print("no key")
+        for item in range(len(r)):
+            try:
+                carb_units = r[item]['totalNutrients']["CHOCDF"]["unit"]
+            except:
+                carb_units = 'g'
         print(str(count) + carb_units)
         return str(count) + carb_units
+        # if item['totalNutrients'] != {}:
+        #         fat_quantity = item['totalNutrients']["FAT"]['quantity']
+        #         count += fat_quantity
+        #     else:
+        #         print("no key")
+        # print(count)
+        # return str(count) + 'g'
+        # try:
+        #     count = 0
+        #     r = self.get_nutrient_data(ingredients)
+        #     data = json.loads(r.text)
+        #     carb_units = data['totalNutrients']["CHOCDF"]['unit']
+        #     for ingredient in ingredients:
+        #         carb_quantity = data['totalNutrients']["CHOCDF"]['quantity']
+        #         count += carb_quantity
+        #         print(carb_quantity, ingredient)
+        #     return str(count) + carb_units
+        # except:
+        #     return "data not found"
 
     #input: ingredients 
     #output: none
@@ -327,52 +369,49 @@ class Recipies:
     def get_fiber(self, ingredients):
         count = 0
         r = self.get_nutrient_data(ingredients)
-        data = json.loads(r.text)
-        fiber_units = data['totalNutrients']["FIBTG"]['unit']
-        for ingredient in ingredients:
-            fiber_quantity = data['totalNutrients']["FIBTG"]['quantity']
-            count += fiber_quantity
-        print(str(count) + fiber_units)
+        for item in range(len(r)):
+            try:
+                fiber_quan = r[item]['totalNutrients']["FIBTG"]["quantity"]
+                count += fiber_quan
+            except:
+                print("no key")
+        for item in range(len(r)):
+            try:
+                fiber_units = r[item]['totalNutrients']["FIBTG"]["unit"]
+            except:
+                fiber_units = 'g'
+        print(str(count) +  fiber_units)
         return str(count) + fiber_units
-    
     #input: ingredients 
     #output: none
     #goes through the edamam database to find the total calories for a given ingredients list.
     def get_calories(self, ingredients):
         count = 0
         r = self.get_nutrient_data(ingredients)
-        data = json.loads(r.text)
-        for ingredient in ingredients:
-            calories = data['calories']
+        print(r)
+        for item in range(len(r)):
+            calories = (r[item]['calories'])
             count += calories
-        print(str(count))
-        return str(count)
+        print(count)
+        return count
 
 
 
-g = Edamam()
-#g.get_carbs(["1 fresh ham", "7 cloves garlic, minced"])
+
+#g = Recipies()
+#g.get_fat("1 large apple")
+#g.get_nutrient_data(['one large apple'])
+#g.get_carbs(['one large apple'])
+
+
+#g.get_carbs(['8 oz chicken breasts', 'seasoned breadcrumbs', 'Parmesan cheese'])
+#g.get_calories(['8 oz chicken breasts', 'seasoned breadcrumbs', 'Parmesan cheese'])
 #g.get_fiber(['1 teaspoon garlic powder', '1 teaspoon salt', '1 ½ cups crema table cream', '24 soft corn tortillas', 'Oil for frying', 'Crema', 'Cilantro', 'Cotija cheese', 'Avocado'])
-# g.get_calories(["1 fresh ham, about 18 pounds, prepared by your butcher (See Step 1)",
-#     "7 cloves garlic, minced",
-#     "1 tablespoon caraway seeds, crushed",
-#     "4 teaspoons salt",
-#     "Freshly ground pepper to taste",
-#     "1 teaspoon olive oil",
-#     "1 medium onion, peeled and chopped",
-#     "3 cups sourdough rye bread, cut into 1/2-inch cubes",
-#     "1 1/4 cups coarsely chopped pitted prunes",
-#     "1 1/4 cups coarsely chopped dried apricots",
-#     "1 large tart apple, peeled, cored and cut into 1/2-inch cubes",
-#     "2 teaspoons chopped fresh rosemary",
-#     "1 egg, lightly beaten",
-#     "1 cup chicken broth, homemade or low-sodium canned"])
 
 
 def main():
     # Recipies object
     v = Recipies()
-    recipe = Edamam()
 
     #see if Cookingmamas.db exists already, if yes, open and append to it
     #if no, create Cookingmamas.db
@@ -411,13 +450,11 @@ def main():
         tasty = v.get_ingredients(r)
         #set up or accumulate to the tasty table
         v.get_tasty_database(r, cur, conn)
-
-
    
         for ingredients in tasty:
-            recipe.get_carbs(ingredients)
-            recipe.get_fiber(ingredients)
-            recipe.get_calories(ingredients)
+            v.get_carbs(ingredients)
+            v.get_fiber(ingredients)
+            v.get_calories(ingredients)
 
 if __name__ == "__main__":
     main()
