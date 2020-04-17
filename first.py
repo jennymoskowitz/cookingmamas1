@@ -427,34 +427,7 @@ class Recipies:
 
 # n.get_tasty_database(cur, conn)
 
-class weight:
-    def __init__(self, value, unit = "g"):
-        """
-        This method is initialized when the object is created
-        """
-        self.value = value
-        self.unit = unit
-        # The value of kg is 0.001 (1E-3) because your logic multiplies the input value. So mg must be 1/1E-3 = 1000
-        self._metric = {"g" : 1,
-                    "kg" : 0.001,
-                    "mg" : 1000
-                   }
-
-    def convert_to_gram(self):
-        """
-        This method converts a self.value to g, kg or mg based on self.unit
-        """
-        return self.value * self._metric[self.unit]
-
-    def __add__(self, other):
-        """
-        The __add__ method is a 'magic' (dunder) method which gets called when we add two numbers using the + operator.
-        this method calls convert_to_gram() methods from this class object and from 'other' class object as well
-        it then returns the sum of both convertion results from the two objects
-        """
-        x = self.convert_to_gram() + other.convert_to_gram()
-        return (x/self._metric[self.unit], self.unit)
-
+    
 class Edamam:
     def get_nutrient_data(self, ingredients):
         url = "https://api.edamam.com/api/nutrition-data"
