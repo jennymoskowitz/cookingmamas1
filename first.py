@@ -220,6 +220,96 @@ class Recipies:
                 cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
             conn.commit()
     
+    def get_ingredients_lst(self, cuisine):
+            ingredients = self.get_ingredients(cuisine)
+            ingredients_dict= {}
+            for x in ingredients:
+                for y in x: 
+                    if y in ingredients_dict: 
+                        ingredients_dict[y] += 1
+                    else: 
+                        ingredients_dict[y] = 0 
+                        ingredients_dict[y] += 1
+            sorted_dict = sorted(ingredients_dict, reverse=True)
+            sorted_keys = sorted_dict.keys()
+            i1 = sorted_keys[0]
+            i2 = sorted_keys[1]
+            i3 = sorted_keys[2]
+            i4 = sorted_keys[3]
+            i5 = sorted_keys[4]
+#this is the one from above- spoonacular bar graph of cusines and # of recipes
+#def cuisine_visualization(self):
+#         r = Tasty()
+#         dict1 = r.get_dict()
+#         fig = plt.figure(figsize = (10, 5))
+#         ax1 = fig.add_subplot(121)
+#         ax1.bar([1,2,3], [3,4,5], color='pink')
+#         names = dict1.keys()
+#         values = dict1.values()
+#         plt.bar(names, values)
+#         plt.suptitle("Top Cuisines")
+#         plt.show()
+
+    #most popular ingredients
+    for i in 
+ #input: none
+    #output: none
+    #creates the pie chart breakdown of percent of recipes top 5 ingredients are in 
+    def pie_chart(self):
+        labels = 'i1', 'i2', 'i3', 'i4', 'i5', 'others'
+        #sizes = [self.micro_percent, self.brewpub_percent, self.regional_percent, self.contract_percent, self.planning_percent, self.proprietor_percent, self.large_percent, self.bar_percent]
+        explode = (0, 0.1, 0, 0, 0, 0, 0, 0)
+        fig1, ax1 = plt.subplots()
+        ax1.pie(sizes, explode=explode, shadow=True, startangle=90)
+        ax1.axis('equal') 
+        #plt.legend( loc = 'best', labels=['%s, %1.1f %%' % (l, s) for l, s in zip(labels, sizes)])
+        plt.title("Pie Chart of Most Popular Ingredients")
+        plt.show()
+
+    #input: cursor and conncetion to the database to access its data
+    #output: none
+    #creates the histogram of Average Calories by Cuisine Type
+    def priceHistogram(self, cur, conn):
+        #Events - Histogram
+        numEvents = 0
+        prices = cur.execute("SELECT Min_Price, Max_Price FROM Event_Prices")
+
+        averagePrices = []
+
+        for minp, maxp in prices:
+            if minp != "n/a" and maxp != "n/a":
+                avg = (float(minp) + float(maxp))/2
+                averagePrices.append(avg)
+            numEvents += 1
+        
+        #print(averagePrices)
+        sortedAveragePrices = sorted(averagePrices)
+        #print(sortedAveragePrices)
+
+        plt.xlabel("Cuisine Type")
+        plt.ylabel("Average Number of Calories")
+        plt.title("Histogram of Average Calories of Recipes by Cusine Type")
+        plt.xlim(sortedAveragePrices[0], sortedAveragePrices[-1])
+        plt.ylim(0, 15)
+
+        plt.hist(sortedAveragePrices, bins=numEvents, range=None, density=None, weights=None, cumulative=False, bottom=None, histtype='bar', align='mid', orientation='vertical', rwidth=None, log=False, color=None, label=None, stacked=False, normed=None, data=None)
+
+        plt.show()
+    
+    def generate_scatter(self):
+        np.random.seed(19680801)
+        N = 50
+        srt = sorted(self.combos, key=lambda x: x[1])
+        for pair in srt:
+            x = pair[0]
+            y = pair[1]
+            if(pair[1] > 50000):
+                continue
+            plt.plot(x, y, 'o', c='blue')
+            plt.xlabel("Distance in Miles")
+            plt.ylabel("Time in Seconds")
+        plt.show()
+    
 
 # v = Recipies()
 # cuisines = v.get_dict()
