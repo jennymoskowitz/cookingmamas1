@@ -43,12 +43,18 @@ import re
 
 class Recipies:
 
+    #input: name of database
+    #output: returns the cursor and connection to the database
+    #set up Event.db
     def set_up_recipie_database(self, db_name):
         path = os.path.dirname(os.path.abspath(__file__))
         conn = sqlite3.connect(path+'/'+db_name)
         cur = conn.cursor()
         return cur, conn
 
+    #input: none
+    #output: none
+    # goes through the Spoonacular API to find 100 random recipies
     def get_recipies(self):
         url = 'https://api.spoonacular.com/recipes/random'
         params = {"apiKey" : '3adec4cbad224f2c9596d4c011d346fc', "number" : "100"}
@@ -56,6 +62,9 @@ class Recipies:
 
         return response
 
+    #input: none
+    #output: none
+    # goes through the recipies returned from the Spoonacular API and makes a dictionary of the cuisines found
     def get_dict(self):
         dict1 = {}
         r = self.get_recipies()
@@ -220,6 +229,7 @@ class Recipies:
                 cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
             conn.commit()
     
+
     def get_ingredients_lst(self, cuisine):
             ingredients = self.get_ingredients(cuisine)
             ingredients_dict= {}
@@ -496,6 +506,7 @@ g = Edamam()
 def main():
     # Recipies object
     v = Recipies()
+    recipe = Edamam()
 
     #see if Cookingmamas.db exists already, if yes, open and append to it
     #if no, create Cookingmamas.db
@@ -535,11 +546,12 @@ def main():
         #set up or accumulate to the tasty table
         v.get_tasty_database(r, cur, conn)
 
-    recipe = Edamam()
-    for ingredients in tasty:
-        recipe.get_carbs(ingredients)
-        recipe.get_fiber(ingredients)
-        recipe.get_calories(ingredients)
+
+   
+        for ingredients in tasty:
+            recipe.get_carbs(ingredients)
+            recipe.get_fiber(ingredients)
+            recipe.get_calories(ingredients)
 
 if __name__ == "__main__":
     main()
