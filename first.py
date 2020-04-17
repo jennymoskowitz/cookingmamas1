@@ -385,6 +385,23 @@ class Recipies:
         plt.show()
     
 
+    def netcarb_graph(self):
+        r = Tasty()
+        dict1 = r.get_dict()
+        fig = plt.figure(figsize = (10, 5))
+        ax1 = fig.add_subplot(121)
+        ax1.bar([1,2,3], [3,4,5], color='blue')
+        ax2 = fig.add_subplot(121)
+        ax2.bar([1,2,3], [3,4,5], color='yellow')
+        #do i need both the ax plots and the fiber carb ones below?
+        carbs = get_carbs(self)
+        fiber = get_fiber(self)
+        values = range(0,50)
+        carb_bars = plt.bar(carbs, values, width = .5)
+        fiber_bars = plt.bar(fiber, values, width = .5)
+        plt.suptitle("Net Carbs of Ingredients")
+        plt.show()
+
     #input: ingredients 
     #output: none
     #goes through the Edamam API to find the nutritional data of a given list of ingredients from get_ingredients.
