@@ -85,6 +85,25 @@ class Recipies:
 
         return cuisine_ingredients
 
+
+    def setUpCategoriesTable(data, cur, conn):
+        cuisine_list = []
+        for x in range(len(data['recipes'])):
+            if len(data['recipes'][x]['cuisines']) > 0:
+                cuisine = data['recipes'][x]['cuisines'][0]
+            else:
+                cuisine = "Cuisine not classified"
+            for c in cuisine_list:
+                if cuisine not in cuisine_list:
+                    cuisine_list.append(cuisine)
+
+        cur.execute("DROP TABLE IF EXISTS Categories")
+        cur.execute("CREATE TABLE Categories (id INTEGER PRIMARY KEY, title TEXT)")
+        for i in range(len(category_list)):
+            cur.execute("INSERT INTO Categories (id,title) VALUES (?,?)",(i,cuisine_list[i]))
+        conn.commit()
+
+    
     #input: type of cuisine, cursor and conncetion to the database to create a table within it
     #output: none
     #sets up the Tasty table within the database, if table exists, then only add to the existing database  
@@ -109,7 +128,13 @@ class Recipies:
                     c = (" ").join(join_word)
                 else:
                     c = cuisine[0].upper() + cuisine[1:]
-        
+                cur.execute('SELECT * FROM Categories')
+                category_id = 0
+                for row in cur:
+                    i = row[0]
+                    n = row[1]
+                    if n == c:
+                        category_id = i
                 ingredients = []
                 try:
                     for num in range(len(data['results'][x]['sections'])):
@@ -120,10 +145,10 @@ class Recipies:
                         for n in range(len(data['results'][x]["recipes"][num]['sections'])):
                             for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
                                 ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, c, str(ingredients)))
+                cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
             conn.commit()
         else:
-            cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingredients TEXT)''')
+            cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, cuisine_id INTEGER, ingredients TEXT)''')
             for x in range(len(data['results'])):
                 recipe_id = data['results'][x]["id"]
                 try:
@@ -139,7 +164,13 @@ class Recipies:
                     c = (" ").join(join_word)
                 else:
                     c = cuisine[0].upper() + cuisine[1:]
-                
+                cur.execute('SELECT * FROM Categories')
+                category_id = 0
+                for row in cur:
+                    i = row[0]
+                    n = row[1]
+                    if n == c:
+                        category_id = i
                 ingredients = []
                 try:
                     for num in range(len(data['results'][x]['sections'])):
@@ -150,7 +181,7 @@ class Recipies:
                         for n in range(len(data['results'][x]["recipes"][num]['sections'])):
                             for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
                                 ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, c, str(ingredients)))
+                cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
             conn.commit()
     
     #input: cursor and conncetion to the database to create a table within it
@@ -162,7 +193,7 @@ class Recipies:
         data = json.loads(r.text)
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Spoonacular' ''')
         if cur.fetchone()[0]==1:
-            for x in range(len(data['recipes'])):
+            for x in range(len(data['recipes'][0:20])):
                 recipe_id = data['recipes'][x]["id"]
                 name = data['recipes'][x]['title']
                 if len(data['recipes'][x]['cuisines']) > 0:
@@ -170,16 +201,23 @@ class Recipies:
             
                 else:
                     cuisine = "Cuisine not classified"
+                cur.execute('SELECT * FROM Categories')
+                category_id = 0
+                for row in cur:
+                    i = row[0]
+                    n = row[1]
+                    if n == cuisine:
+                        category_id = i
                 ingredients = []
                 for num in range(len(data['recipes'][x]['analyzedInstructions'])):
                     for n in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'])):
                         for j in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'])):
                             ingredients.append(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'][j]['name'])
-                cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+                cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, cuisine, cuisine_id, str(ingredients)))
             conn.commit()
         else:
-            cur.execute('''CREATE TABLE Spoonacular (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, ingredients TEXT)''')
-            for x in range(len(data['recipes'])):
+            cur.execute('''CREATE TABLE Spoonacular (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, cuisine_id INTEGER, ingredients TEXT)''')
+            for x in range(len(data['recipes'][0:20])):
                 recipe_id = data['recipes'][x]["id"]
                 name = data['recipes'][x]['title']
                 if len(data['recipes'][x]['cuisines']) > 0:
@@ -187,34 +225,88 @@ class Recipies:
             
                 else:
                     cuisine = "Cuisine not classified"
+                cur.execute('SELECT * FROM Categories')
+                category_id = 0
+                for row in cur:
+                    i = row[0]
+                    n = row[1]
+                    if n == cuisine:
+                        cuisine_id = i
             ingredients = []
             for num in range(len(data['recipes'][x]['analyzedInstructions'])):
                 for n in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'])):
                     for j in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'])):
                         ingredients.append(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'][j]['name'])
-                cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, ingredients) VALUES (?, ?, ?, ?)''', (recipe_id, name, cuisine, str(ingredients)))
+                cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, cuisine, cuisine_id, str(ingredients)))
+            conn.commit()
+    
+
+     def join_Cuisine(self, cur, conn):
+        list_cuisines = []
+        cur.execute('''SELECT Spoonacular.name, Tasty.name
+        FROM Spoonacular
+        INNER JOIN Tasty
+        ON Spoonacular.cuisine_id = Tasty.cuisine_id''')
+        for row in cur:
+            list_cuisines.append(row)
+            print(row)
+
+    def get_edemam_database(self, ingredients):
+        
+        cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Edemam' ''')
+        if cur.fetchone()[0]==1:
+            for recipie in ingredients:
+                i = recipie
+                carbs = self.get_carbs(recipie)
+                fiber = self.get_fiber(recipie)
+                calories = self.get_calories(recipie)
+               cur.execute('''INSERT OR REPLACE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories)) 
+            conn.commit()
+
+        else:
+            cur.execute("CREATE TABLE Edemam (ingredients TEXT, carbs TEXT, fiber TEXT, calories TEXT)")
+            for recipie in ingredients:
+                i = recipie
+                carbs = self.get_carbs(recipie)
+                fiber = self.get_fiber(recipie)
+                calories = self.get_calories(recipie)
+                cur.execute('''INSERT OR REPLACE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories))
             conn.commit()
     
     #input: type of cuisine
     #output: none
     #goes through get_ingredients and sets the 5 most popular ingredients equal to variables. 
     def get_ingredients_lst(self, cuisine):
-            ingredients = self.get_ingredients(cuisine)
-            ingredients_dict= {}
-            for x in ingredients:
-                for y in x: 
-                    if y in ingredients_dict: 
-                        ingredients_dict[y] += 1
-                    else: 
-                        ingredients_dict[y] = 0 
-                        ingredients_dict[y] += 1
-            sorted_dict = sorted(ingredients_dict, reverse=True)
-            sorted_keys = sorted_dict.keys()
-            i1 = sorted_keys[0]
-            i2 = sorted_keys[1]
-            i3 = sorted_keys[2]
-            i4 = sorted_keys[3]
-            i5 = sorted_keys[4]
+        ingredients = self.get_ingredients(cuisine)
+        ingredients_dict= {}
+        for x in ingredients:
+            for y in x: 
+                if y in ingredients_dict: 
+                    ingredients_dict[y] += 1
+                else: 
+                    ingredients_dict[y] = 0 
+                    ingredients_dict[y] += 1
+        sorted_dict = sorted(ingredients_dict, reverse=True)
+        sorted_keys = sorted_dict.keys()
+        i1 = sorted_keys[0]
+        i2 = sorted_keys[1]
+        i3 = sorted_keys[2]
+        i4 = sorted_keys[3]
+        i5 = sorted_keys[4]
+            sorted_vals = sorted_dict.values()
+        for i in sorted_vals[0:4]
+            total += i
+        return total 
+    
+    def top_ingredients_percents(self):
+        r = get_ingredients_lst(cuisine)
+        i1_percent = sorted_vals[0] / r
+        i2_percent = sorted_vals[1] / r
+        i3_percent = sorted_vals[2] / r
+        i4_percent = sorted_vals[3] / r
+        i5_percent = sorted_vals[4] / r
+        other_amount = r - (i1_percent + i2_percent + i3_percent + i4_percent + i5_percent) 
+        other_percent = other_amount / r
 
 
 #input:none
@@ -238,13 +330,13 @@ class Recipies:
     #output: none
     #creates the pie chart breakdown of percent of recipes top 5 ingredients are in 
     def pie_chart(self):
-        labels = 'i1', 'i2', 'i3', 'i4', 'i5', 'others'
-        #sizes = [self.micro_percent, self.brewpub_percent, self.regional_percent, self.contract_percent, self.planning_percent, self.proprietor_percent, self.large_percent, self.bar_percent]
+        labels = i1, i2, i3, i4, i5, 'others'
+        sizes = [self.i1_percent, self.i2_percent, self.i3_percent, self.i4_percent, self.i5_percent, self.other_percent]
         explode = (0, 0.1, 0, 0, 0, 0, 0, 0)
         fig1, ax1 = plt.subplots()
         ax1.pie(sizes, explode=explode, shadow=True, startangle=90)
         ax1.axis('equal') 
-        #plt.legend( loc = 'best', labels=['%s, %1.1f %%' % (l, s) for l, s in zip(labels, sizes)])
+        plt.legend( loc = 'best', labels=['%s, %1.1f %%' % (l, s) for l, s in zip(labels, sizes)])
         plt.title("Pie Chart of Most Popular Ingredients")
         plt.show()
 
@@ -335,7 +427,7 @@ class Recipies:
                 carb_quan = r[item]['totalNutrients']["CHOCDF"]["quantity"]
                 count += carb_quan
             else:
-                print("no key")
+                print("No key")
         for item in range(len(r)):
             try:
                 carb_units = r[item]['totalNutrients']["CHOCDF"]["unit"]
@@ -374,7 +466,7 @@ class Recipies:
                 fiber_quan = r[item]['totalNutrients']["FIBTG"]["quantity"]
                 count += fiber_quan
             except:
-                print("no key")
+                print("No key")
         for item in range(len(r)):
             try:
                 fiber_units = r[item]['totalNutrients']["FIBTG"]["unit"]
@@ -390,11 +482,64 @@ class Recipies:
         r = self.get_nutrient_data(ingredients)
         print(r)
         for item in range(len(r)):
-            calories = (r[item]['calories'])
-            count += calories
+            try:
+                calories = (r[item]['calories'])
+                count += calories
+            except:
+                print("No key")
         print(count)
         return count
 
+
+    def writeCalculations(self, cur, conn):
+        path = os.path.dirname(os.path.abspath(__file__))
+        f = open(path + "/Calculations.txt", "w+")
+
+        #Categories Calculation 
+        f.write("\nCuisine with the most recipies:\n\n")
+        sql = "SELECT title FROM Categories"
+        cur.execute(sql)
+        dict_cuisine = {}
+        for title in cur:
+            if title not in dict_cuisine:
+                dict_cuisine[title] = 0
+                dict_cuisine[title] += 1
+            else:
+                dict_cuisine[title] += 1          
+        sorted_dict = sorted(dict_cuisine.items(), reverse= True, key = lambda t: t[1])
+        f.write("Most Recipies = " + sorted_dict[0] + "\n")
+
+
+        f.write("\n\n############################################\n\n")
+
+        #amount of recipies from spoonacular without a cuisine
+        f.write("Amount of Recipies Without a Cuisine:\n\n")
+        sql = "SELECT cuisine FROM Spoonacular"
+        cur.execute(sql)
+        count = 0
+        for cuisine in cur:
+            if cuisine == "Cuisine not classified":
+                count += 1
+                
+        f.write("Amount of Recipies Without a Cuisine" + ": " + str(count) + "\n")
+
+        f.write("\n\n############################################\n\n")
+
+        #Tasty Calculation
+        f.write("\nAverage of Ingredients List:\n\n")
+        sql = "SELECT ingredients FROM Tasty"
+        cur.execute(sql)
+        recipies = 0
+        ingredients = 0
+        for r in cur:
+            ing_list = list(r)
+            ingredients += len(ing_list)
+            recipies += 1
+        avg = ingredients / recipies
+        f.write("Average of Ingredients List = " + str(avg) + "\n")
+        
+
+        f.write("\n\n############################################\n\n")
 
 
 
