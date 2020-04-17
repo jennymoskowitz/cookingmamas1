@@ -459,7 +459,7 @@ class Edamam:
     def get_nutrient_data(self, ingredients):
         url = "https://api.edamam.com/api/nutrition-data"
 
-        querystring = {"app_id": "8b85725d", "app_key": "9e1ffb358e3846f5d71b56ab8b75e4dd", "ingr": ingredients}
+        querystring = {"app_id": "e29147b2", "app_key": "b34772921762c60de0b5875b765b707a", "ingr": ingredients}
 
         response = requests.request("GET", url, params=querystring)
 
@@ -468,27 +468,56 @@ class Edamam:
         return response
 
     def get_carbs(self, ingredients):
-        data = self.get_nutrient_data(ingredients)
-        dictionary= json.loads(data.text)
-        carbs_Quantity = dictionary["totalNutrients"]["CHOCDF"]["quantity"]
-        carbs_unit = dictionary["totalNutrients"]["CHOCDF"]["unit"]
-        print(str(carbs_Quantity) + carbs_unit)
-        return str(carbs_Quantity) + carbs_unit
+        count = 0
+        r = self.get_nutrient_data(ingredients)
+        data = json.loads(r.text)
+        carb_units = data['totalNutrients']["CHOCDF"]['unit']
+        for ingredient in ingredients:
+            carb_quantity = data['totalNutrients']["CHOCDF"]['quantity']
+            count += carb_quantity
+        print(str(count) + carb_units)
+        return str(count) + carb_units
 
     def get_fiber(self, ingredients):
-        data = self.get_nutrient_data(ingredients)
-        dictionary = json.loads(data.text)
-        fiber_Quantity = dictionary["totalNutrients"]["FIBTG"]["quantity"]
-        fiber_unit = dictionary["totalNutrients"]["FIBTG"]["unit"]
-        print(str(fiber_Quantity) + fiber_unit)
-        return str(fiber_Quantity) + fiber_unit
-       
+        count = 0
+        r = self.get_nutrient_data(ingredients)
+        data = json.loads(r.text)
+        fiber_units = data['totalNutrients']["FIBTG"]['unit']
+        for ingredient in ingredients:
+            fiber_quantity = data['totalNutrients']["FIBTG"]['quantity']
+            count += fiber_quantity
+        print(str(count) + fiber_units)
+        return str(count) + fiber_units
+    
+    def get_calories(self, ingredients):
+        count = 0
+        r = self.get_nutrient_data(ingredients)
+        data = json.loads(r.text)
+        for ingredient in ingredients:
+            calories = data['calories']
+            count += calories
+        print(str(count))
+        return str(count)
 
 
-# g = Edamam()
-# g.get_carbs(['1 teaspoon garlic powder', '1 teaspoon salt', '1 ½ cups crema table cream', '24 soft corn tortillas', 'Oil for frying', 'Crema', 'Cilantro', 'Cotija cheese', 'Avocado'])
-# g.get_fiber(['1 teaspoon garlic powder', '1 teaspoon salt', '1 ½ cups crema table cream', '24 soft corn tortillas', 'Oil for frying', 'Crema', 'Cilantro', 'Cotija cheese', 'Avocado'])
 
+g = Edamam()
+#g.get_carbs(["1 fresh ham", "7 cloves garlic, minced"])
+#g.get_fiber(['1 teaspoon garlic powder', '1 teaspoon salt', '1 ½ cups crema table cream', '24 soft corn tortillas', 'Oil for frying', 'Crema', 'Cilantro', 'Cotija cheese', 'Avocado'])
+# g.get_calories(["1 fresh ham, about 18 pounds, prepared by your butcher (See Step 1)",
+#     "7 cloves garlic, minced",
+#     "1 tablespoon caraway seeds, crushed",
+#     "4 teaspoons salt",
+#     "Freshly ground pepper to taste",
+#     "1 teaspoon olive oil",
+#     "1 medium onion, peeled and chopped",
+#     "3 cups sourdough rye bread, cut into 1/2-inch cubes",
+#     "1 1/4 cups coarsely chopped pitted prunes",
+#     "1 1/4 cups coarsely chopped dried apricots",
+#     "1 large tart apple, peeled, cored and cut into 1/2-inch cubes",
+#     "2 teaspoons chopped fresh rosemary",
+#     "1 egg, lightly beaten",
+#     "1 cup chicken broth, homemade or low-sodium canned"])
 
 
 def main():
@@ -532,6 +561,12 @@ def main():
         tasty = v.get_ingredients(r)
         #set up or accumulate to the tasty table
         v.get_tasty_database(r, cur, conn)
+
+    recipe = Edamam()
+    for ingredients in tasty:
+        recipe.get_carbs(ingredients)
+        recipe.get_fiber(ingredients)
+        recipe.get_calories(ingredients)
 
 if __name__ == "__main__":
     main()
