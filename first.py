@@ -60,7 +60,7 @@ class Recipies:
         dict1 = {}
         r = self.get_recipies()
         data = json.loads(r.text)
-        print(data)
+
         for x in range(len(data['recipes'])):
             if len(data['recipes'][x]['cuisines']) > 0:
                 if data['recipes'][x]['cuisines'][0] not in dict1:
@@ -68,7 +68,7 @@ class Recipies:
                 dict1[data['recipes'][x]['cuisines'][0]] += 1
             else:
                 print("Cuisine not found.")
-        print(dict1)
+
         # sorted_dict = sorted(dict1.items(), key = lambda t: t[1], reverse = True)
         # l = []
         # for tup in sorted_dict:
@@ -104,7 +104,7 @@ class Recipies:
                         for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
                             ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
             cuisine_ingredients.append(ingredients)
-        print(cuisine_ingredients)
+
         return cuisine_ingredients
 
     def get_tasty_database(self, cuisine, cur, conn):
@@ -115,9 +115,9 @@ class Recipies:
             for x in range(len(data['results'])):
                 recipe_id = data['results'][x]["id"]
                 try:
-                    name = data["results"][x]["seo_title"]
-                except:
                     name = data["results"][x]["name"]
+                except:
+                    name = data["results"][x]["seo_title"]
                 if "_" in cuisine:
                     join_word = []
                     split_cuisine = cuisine.split("_")
@@ -150,9 +150,9 @@ class Recipies:
             for x in range(len(data['results'])):
                 recipe_id = data['results'][x]["id"]
                 try:
-                    name = data["results"][x]["seo_title"]
-                except:
                     name = data["results"][x]["name"]
+                except:
+                    name = data["results"][x]["seo_title"]
                 if "_" in cuisine:
                     join_word = []
                     split_cuisine = cuisine.split("_")
