@@ -45,8 +45,8 @@ class Recipies:
                 if data['recipes'][x]['cuisines'][0] not in dict1:
                     dict1[data['recipes'][x]['cuisines'][0]] = 0
                 dict1[data['recipes'][x]['cuisines'][0]] += 1
-            else:
-                print("Cuisine not found.")
+            # else:
+            #     print("Cuisine not found.")
         return dict1.keys()
     
     #input: type of cuisine
@@ -211,7 +211,7 @@ class Recipies:
         cur.execute("DROP TABLE IF EXISTS Spoonacular")
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Spoonacular' ''')
         if cur.fetchone()[0]==1:
-            for x in range(len(data['recipes'][0:20])): #run 20 each time
+            for x in range(len(data['recipes'])): #run 20 each time
                 recipe_id = data['recipes'][x]["id"]
                 name = data['recipes'][x]['title']
                 if len(data['recipes'][x]['cuisines']) > 0:
@@ -235,7 +235,7 @@ class Recipies:
             conn.commit()
         else:
             cur.execute('''CREATE TABLE Spoonacular (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, cuisine_id INTEGER, ingredients TEXT)''')
-            for x in range(len(data['recipes'][0:20])):
+            for x in range(len(data['recipes'])):
                 recipe_id = data['recipes'][x]["id"]
                 name = data['recipes'][x]['title']
                 if len(data['recipes'][x]['cuisines']) > 0:
@@ -462,9 +462,11 @@ class Recipies:
         count = 0
         r = self.get_nutrient_data(ingredients)
         for item in range(len(r)):
-            if r[item]['totalNutrients'] != {}:
+            try:
                 carb_quan = r[item]['totalNutrients']["CHOCDF"]["quantity"]
                 count += carb_quan
+            except:
+                y = "no key"
         for item in range(len(r)):
             try:
                 carb_units = r[item]['totalNutrients']["CHOCDF"]["unit"]
@@ -497,7 +499,6 @@ class Recipies:
     def get_calories(self, ingredients):
         count = 0
         r = self.get_nutrient_data(ingredients)
-        print(r)
         for item in range(len(r)):
             try:
                 calories = (r[item]['calories'])
