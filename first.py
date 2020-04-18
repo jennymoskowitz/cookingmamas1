@@ -86,22 +86,36 @@ class Recipies:
         return cuisine_ingredients
 
 
-    def setUpCategoriesTable(data, cur, conn):
+    def setUpCategoriesTable(self, cur, conn):
         cuisine_list = []
-        for x in range(len(data['recipes'])):
-            if len(data['recipes'][x]['cuisines']) > 0:
-                cuisine = data['recipes'][x]['cuisines'][0]
-            else:
-                cuisine = "Cuisine not classified"
-            for c in cuisine_list:
-                if cuisine not in cuisine_list:
-                    cuisine_list.append(cuisine)
-
-        cur.execute("DROP TABLE IF EXISTS Categories")
-        cur.execute("CREATE TABLE Categories (id INTEGER PRIMARY KEY, title TEXT)")
-        for i in range(len(category_list)):
-            cur.execute("INSERT INTO Categories (id,title) VALUES (?,?)",(i,cuisine_list[i]))
-        conn.commit()
+        r = self.get_recipies()
+        data = json.loads(r.text)
+        cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Categories' ''')
+        if cur.fetchone()[0]==1:
+            for x in range(len(data['recipes'])):
+                if len(data['recipes'][x]['cuisines']) > 0:
+                    cuisine = data['recipes'][x]['cuisines'][0]
+                else:
+                    cuisine = "Cuisine not classified"
+                for c in cuisine_list:
+                    if cuisine not in cuisine_list:
+                        cuisine_list.append(cuisine)
+            for i in range(len(cuisine_list)):
+                cur.execute("INSERT INTO Categories (id,title) VALUES (?,?)",(i,cuisine_list[i]))
+            conn.commit()
+        else:
+            cur.execute("CREATE TABLE Categories (id INTEGER PRIMARY KEY, title TEXT)")
+            for x in range(len(data['recipes'])):
+                if len(data['recipes'][x]['cuisines']) > 0:
+                    cuisine = data['recipes'][x]['cuisines'][0]
+                else:
+                    cuisine = "Cuisine not classified"
+                for c in cuisine_list:
+                    if cuisine not in cuisine_list:
+                        cuisine_list.append(cuisine)
+            for i in range(len(cuisine_list)):
+                cur.execute("INSERT INTO Categories (id,title) VALUES (?,?)",(i,cuisine_list[i]))
+            conn.commit()
 
     
     #input: type of cuisine, cursor and conncetion to the database to create a table within it
@@ -111,6 +125,7 @@ class Recipies:
     def get_tasty_database(self, cuisine, cur, conn):
         r = self.get_tasty_recipes(cuisine)
         data = json.loads(r.text)
+        cur.execute("DROP TABLE IF EXISTS Tasty")
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Tasty' ''')
         if cur.fetchone()[0]==1:
             for x in range(len(data['results'])):
@@ -129,12 +144,12 @@ class Recipies:
                 else:
                     c = cuisine[0].upper() + cuisine[1:]
                 cur.execute('SELECT * FROM Categories')
-                category_id = 0
+                cuisine_id = 0
                 for row in cur:
                     i = row[0]
                     n = row[1]
                     if n == c:
-                        category_id = i
+                        cuisine_id = i
                 ingredients = []
                 try:
                     for num in range(len(data['results'][x]['sections'])):
@@ -165,12 +180,12 @@ class Recipies:
                 else:
                     c = cuisine[0].upper() + cuisine[1:]
                 cur.execute('SELECT * FROM Categories')
-                category_id = 0
+                cuisine_id = 0
                 for row in cur:
                     i = row[0]
                     n = row[1]
                     if n == c:
-                        category_id = i
+                        cuisine_id = i
                 ingredients = []
                 try:
                     for num in range(len(data['results'][x]['sections'])):
@@ -191,6 +206,7 @@ class Recipies:
     def get_spoon_database(self, cur, conn):
         r = self.get_recipies()
         data = json.loads(r.text)
+        cur.execute("DROP TABLE IF EXISTS Spoonacular")
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Spoonacular' ''')
         if cur.fetchone()[0]==1:
             for x in range(len(data['recipes'][0:20])):
@@ -202,12 +218,12 @@ class Recipies:
                 else:
                     cuisine = "Cuisine not classified"
                 cur.execute('SELECT * FROM Categories')
-                category_id = 0
+                cuisine_id = 0
                 for row in cur:
                     i = row[0]
                     n = row[1]
                     if n == cuisine:
-                        category_id = i
+                        cuisine_id = i
                 ingredients = []
                 for num in range(len(data['recipes'][x]['analyzedInstructions'])):
                     for n in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'])):
@@ -226,7 +242,7 @@ class Recipies:
                 else:
                     cuisine = "Cuisine not classified"
                 cur.execute('SELECT * FROM Categories')
-                category_id = 0
+                cuisine_id = 0
                 for row in cur:
                     i = row[0]
                     n = row[1]
@@ -241,7 +257,7 @@ class Recipies:
             conn.commit()
     
 
-     def join_Cuisine(self, cur, conn):
+    def join_Cuisine(self, cur, conn):
         list_cuisines = []
         cur.execute('''SELECT Spoonacular.name, Tasty.name
         FROM Spoonacular
@@ -260,7 +276,7 @@ class Recipies:
                 carbs = self.get_carbs(recipie)
                 fiber = self.get_fiber(recipie)
                 calories = self.get_calories(recipie)
-               cur.execute('''INSERT OR REPLACE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories)) 
+                cur.execute('''INSERT OR REPLACE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories)) 
             conn.commit()
 
         else:
@@ -293,8 +309,8 @@ class Recipies:
         i3 = sorted_keys[2]
         i4 = sorted_keys[3]
         i5 = sorted_keys[4]
-            sorted_vals = sorted_dict.values()
-        for i in sorted_vals[0:4]
+        sorted_vals = sorted_dict.values()
+        for i in sorted_vals[0:4]:
             total += i
         return total 
     
@@ -589,6 +605,7 @@ def main():
     # that have each then return a list of the cuisines
     cuisines = v.get_dict()
 
+    v.setUpCategoriesTable(cur, conn)
     #set up or accumulate to the spoonacular table
     v.get_spoon_database(cur, conn)
 
@@ -613,10 +630,10 @@ def main():
         #set up or accumulate to the tasty table
         v.get_tasty_database(r, cur, conn)
    
-        for ingredients in tasty:
-            v.get_carbs(ingredients)
-            v.get_fiber(ingredients)
-            v.get_calories(ingredients)
+        # for ingredients in tasty:
+        #     v.get_carbs(ingredients)
+        #     v.get_fiber(ingredients)
+        #     v.get_calories(ingredients)
 
 if __name__ == "__main__":
     main()
