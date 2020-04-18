@@ -115,7 +115,7 @@ class Recipies:
         cur.execute("DROP TABLE IF EXISTS Tasty")
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Tasty' ''')
         if cur.fetchone()[0]==1:
-            for x in range(len(data['results'][0:4])):
+            for x in range(4):
                 recipe_id = data['results'][x]["id"]
                 try:
                     name = data["results"][x]["name"]
@@ -151,7 +151,7 @@ class Recipies:
             conn.commit()
         else:
             cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, cuisine_id INTEGER, ingredients TEXT)''')
-            for x in range(len(data['results'][0:4])):
+            for x in range(4):
                 recipe_id = data['results'][x]["id"]
                 try:
                     name = data["results"][x]["name"]
@@ -400,32 +400,18 @@ class Recipies:
             plt.ylabel("Time in Seconds")
         plt.show()
     
-<<<<<<< HEAD
     #input: 
     #output:
     def netcarb_graph(self):
         carbs = get_carbs(self)
         fiber = get_fiber(self)
         values = range(0,50)
-=======
-    #input: none
-    #output: 
-    def netcarb_graph(self, ingredients):
-        r = Recipe()
-        dict1 = r.get_dict()
->>>>>>> b9df702ab2e4f7c627769b900f89fe4ab3b66448
         fig = plt.figure(figsize = (10, 5))
         ax1 = fig.add_subplot(121)
         ax1.bar([1,2,3], [3,4,5], color='blue')
         ax2 = fig.add_subplot(121)
         ax2.bar([1,2,3], [3,4,5], color='yellow')
         #do i need both the ax plots and the fiber carb ones below?
-<<<<<<< HEAD
-=======
-        carbs = r.get_carbs(ingredients)
-        fiber = r.get_fiber(ingredients)
-        values = range(0,50)
->>>>>>> b9df702ab2e4f7c627769b900f89fe4ab3b66448
         carb_bars = plt.bar(carbs, values, width = .5)
         fiber_bars = plt.bar(fiber, values, width = .5)
         plt.suptitle("Net Carbs of Ingredients")
@@ -442,12 +428,11 @@ class Recipies:
             new_lst = []
             new_lst.append(ingredient)
     
-            querystring = {"app_id": "2fb619c7", "app_key": "67179bb588b2a6cacbf3cb39c237db72", "ingr": new_lst}
+            querystring = {"app_id": "3ab5445f", "app_key": "e8238ffb38bc0b9ea027ea242c28476f", "ingr": new_lst}
 
             response = requests.request("GET", url, params=querystring)
             response1 = json.loads(response.text)
             lst.append(response1)
-
         return lst
 
     
@@ -460,8 +445,8 @@ class Recipies:
         r = self.get_nutrient_data(ingredients)
         for item in range(len(r)):
             try:
-                carb_quan = r[item]['totalNutrients']["CHOCDF"]["quantity"]
-                count += carb_quan
+                carb_quantity = r[item]['totalNutrients']["CHOCDF"]["quantity"]
+                count += carb_quantity
             except:
                 y = "no key"
         for item in range(len(r)):
@@ -482,7 +467,7 @@ class Recipies:
                 fiber_quan = r[item]['totalNutrients']["FIBTG"]["quantity"]
                 count += fiber_quan
             except:
-                x = "no key"
+                py = "no key"
         for item in range(len(r)):
             try:
                 fiber_units = r[item]['totalNutrients']["FIBTG"]["unit"]
