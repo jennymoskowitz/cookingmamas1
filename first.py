@@ -27,7 +27,7 @@ class Recipies:
     #goes through the Spoonacular API to find 100 random recipies
     def get_recipies(self):
         url = 'https://api.spoonacular.com/recipes/random'
-        params = {"apiKey" : '3adec4cbad224f2c9596d4c011d346fc', "number" : "20"}
+        params = {"apiKey" : '9edff64788dc4a88af9dcf1e9965568d', "number" : "20"}
         response = requests.request("GET", url, params = params)
 
         return response
@@ -70,19 +70,21 @@ class Recipies:
         cuisine_ingredients = []
         r = self.get_tasty_recipes(cuisine)
         data = json.loads(r.text)
-        for x in range(len(data['results'][0:4])):
-            ingredients = []
-            try:
-                for num in range(len(data['results'][x]['sections'])):
-                    for n in range(len(data['results'][x]['sections'][num]['components'])):
-                        ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
-            except:
-                for num in range(len(data['results'][x]["recipes"])):
-                    for n in range(len(data['results'][x]["recipes"][num]['sections'])):
-                        for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
-                            ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
+        try:
+            for x in range(4):
+                ingredients = []
+                try:
+                    for num in range(len(data['results'][x]['sections'])):
+                        for n in range(len(data['results'][x]['sections'][num]['components'])):
+                            ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
+                except:
+                    for num in range(len(data['results'][x]["recipes"])):
+                        for n in range(len(data['results'][x]["recipes"][num]['sections'])):
+                            for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
+                                ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
             cuisine_ingredients.append(ingredients)
-
+        except:
+            pass
         return cuisine_ingredients
 
     #input: cursor and conncetion to the database to create a table within it
@@ -115,77 +117,82 @@ class Recipies:
         cur.execute("DROP TABLE IF EXISTS Tasty")
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Tasty' ''')
         if cur.fetchone()[0]==1:
-            for x in range(4):
-                recipe_id = data['results'][x]["id"]
-                try:
-                    name = data["results"][x]["name"]
-                except:
-                    name = data["results"][x]["seo_title"]
-                if "_" in cuisine:
-                    join_word = []
-                    split_cuisine = cuisine.split("_")
-                    for word in split_cuisine:
-                        w = word[0].upper() + word[1:]
-                        join_word.append(w)
-                    c = (" ").join(join_word)
-                else:
-                    c = cuisine[0].upper() + cuisine[1:]
-                cur.execute('SELECT * FROM Categories')
-                cuisine_id = 0
-                for row in cur:
-                    i = row[0]
-                    n = row[1]
-                    if n == c:
-                        cuisine_id = i
-                ingredients = []
-                try:
-                    for num in range(len(data['results'][x]['sections'])):
-                        for n in range(len(data['results'][x]['sections'][num]['components'])):
-                            ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
-                except:
-                    for num in range(len(data['results'][x]["recipes"])):
-                        for n in range(len(data['results'][x]["recipes"][num]['sections'])):
-                            for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
-                                ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
-            conn.commit()
+            try:
+                for x in range(4):
+                    recipe_id = data['results'][x]["id"]
+                    try:
+                        name = data["results"][x]["name"]
+                    except:
+                        name = data["results"][x]["seo_title"]
+                    if "_" in cuisine:
+                        join_word = []
+                        split_cuisine = cuisine.split("_")
+                        for word in split_cuisine:
+                            w = word[0].upper() + word[1:]
+                            join_word.append(w)
+                        c = (" ").join(join_word)
+                    else:
+                        c = cuisine[0].upper() + cuisine[1:]
+                    cur.execute('SELECT * FROM Categories')
+                    cuisine_id = 0
+                    for row in cur:
+                        i = row[0]
+                        n = row[1]
+                        if n == c:
+                            cuisine_id = i
+                    ingredients = []
+                    try:
+                        for num in range(len(data['results'][x]['sections'])):
+                            for n in range(len(data['results'][x]['sections'][num]['components'])):
+                                ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
+                    except:
+                        for num in range(len(data['results'][x]["recipes"])):
+                            for n in range(len(data['results'][x]["recipes"][num]['sections'])):
+                                for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
+                                    ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
+                    cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
+                conn.commit()
+            except:
+                pass
         else:
             cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, cuisine_id INTEGER, ingredients TEXT)''')
-            for x in range(4):
-                recipe_id = data['results'][x]["id"]
-                try:
-                    name = data["results"][x]["name"]
-                except:
-                    name = data["results"][x]["seo_title"]
-                if "_" in cuisine:
-                    join_word = []
-                    split_cuisine = cuisine.split("_")
-                    for word in split_cuisine:
-                        w = word[0].upper() + word[1:]
-                        join_word.append(w)
-                    c = (" ").join(join_word)
-                else:
-                    c = cuisine[0].upper() + cuisine[1:]
-                cur.execute('SELECT * FROM Categories')
-                cuisine_id = 0
-                for row in cur:
-                    i = row[0]
-                    n = row[1]
-                    if n == c:
-                        cuisine_id = i
-                ingredients = []
-                try:
-                    for num in range(len(data['results'][x]['sections'])):
-                        for n in range(len(data['results'][x]['sections'][num]['components'])):
-                            ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
-                except:
-                    for num in range(len(data['results'][x]["recipes"])):
-                        for n in range(len(data['results'][x]["recipes"][num]['sections'])):
-                            for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
-                                ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
-            conn.commit()
-    
+            try:
+                for x in range(4):
+                    recipe_id = data['results'][x]["id"]
+                    try:
+                        name = data["results"][x]["name"]
+                    except:
+                        name = data["results"][x]["seo_title"]
+                    if "_" in cuisine:
+                        join_word = []
+                        split_cuisine = cuisine.split("_")
+                        for word in split_cuisine:
+                            w = word[0].upper() + word[1:]
+                            join_word.append(w)
+                        c = (" ").join(join_word)
+                    else:
+                        c = cuisine[0].upper() + cuisine[1:]
+                    cur.execute('SELECT * FROM Categories')
+                    cuisine_id = 0
+                    for row in cur:
+                        i = row[0]
+                        n = row[1]
+                        if n == c:
+                            cuisine_id = i
+                    ingredients = []
+                    try:
+                        for num in range(len(data['results'][x]['sections'])):
+                            for n in range(len(data['results'][x]['sections'][num]['components'])):
+                                ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
+                    except:
+                        for num in range(len(data['results'][x]["recipes"])):
+                            for n in range(len(data['results'][x]["recipes"][num]['sections'])):
+                                for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
+                                    ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
+                    cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
+                conn.commit()
+            except:
+                pass
     #input: cursor and conncetion to the database to create a table within it
     #output: creates spoonacular table in database --> look below for description
     #sets up the Spoonacular table within the database, if table exists, then only add to the existing database  
@@ -252,22 +259,20 @@ class Recipies:
         
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Edemam' ''')
         if cur.fetchone()[0]==1:
-            for recipie in ingredients:
-                i = recipie
-                carbs = self.get_carbs(recipie)
-                fiber = self.get_fiber(recipie)
-                calories = self.get_calories(recipie)
-                cur.execute('''INSERT OR REPLACE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories)) 
+            i = str(ingredients)
+            carbs = self.get_carbs(ingredients)
+            fiber = self.get_fiber(ingredients)
+            calories = self.get_calories(ingredients)
+            cur.execute('''INSERT OR REPLACE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories)) 
             conn.commit()
 
         else:
             cur.execute("CREATE TABLE Edemam (ingredients TEXT, carbs TEXT, fiber TEXT, calories TEXT)")
-            for recipie in ingredients:
-                i = recipie
-                carbs = self.get_carbs(recipie)
-                fiber = self.get_fiber(recipie)
-                calories = self.get_calories(recipie)
-                cur.execute('''INSERT OR REPLACE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories))
+            i = str(ingredients)
+            carbs = self.get_carbs(ingredients)
+            fiber = self.get_fiber(ingredients)
+            calories = self.get_calories(ingredients)
+            cur.execute('''INSERT OR REPLACE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories))
             conn.commit()
     
     #input: cursor and conncetion to the database 
@@ -330,8 +335,7 @@ class Recipies:
     #output: Spoonacular bar graph of most popular cuisines and number of recipes.
 
     def spoonacular_visualization(self):
-        r = Recipies()
-        dict1 = r.get_dict()
+        dict1 = self.get_dict()
         fig = plt.figure(figsize = (10, 5))
         ax1 = fig.add_subplot(121)
         ax1.bar([1,2,3], [3,4,5], color='pink')
@@ -402,9 +406,9 @@ class Recipies:
     
     #input: 
     #output:
-    def netcarb_graph(self):
-        carbs = get_carbs(self)
-        fiber = get_fiber(self)
+    def netcarb_graph(self, ingredients):
+        carbs = self.get_carbs(ingredients)
+        fiber = self.get_fiber(ingredients)
         values = range(0,50)
         fig = plt.figure(figsize = (10, 5))
         ax1 = fig.add_subplot(121)
@@ -428,7 +432,7 @@ class Recipies:
             new_lst = []
             new_lst.append(ingredient)
     
-            querystring = {"app_id": "3ab5445f", "app_key": "e8238ffb38bc0b9ea027ea242c28476f", "ingr": new_lst}
+            querystring = {"app_id": "6630776c", "app_key": "15d28378bd93ee4477e0a61ad05df9b4", "ingr": new_lst}
 
             response = requests.request("GET", url, params=querystring)
             response1 = json.loads(response.text)
@@ -619,12 +623,7 @@ def main():
    
 # #         #calls edamam and netcarb  
         for ingredients in tasty:
-            a = v.get_carbs(ingredients)
-            print(a)
-            b = v.get_fiber(ingredients)
-            print(b)
-            c = v.get_calories(ingredients)
-            print(c)
+            v.get_edemam_database(cur, conn, ingredients)
             # v.netcarb_graph(ingredients)
 
 # #     #calls calculations
@@ -635,7 +634,7 @@ def main():
 
 # # #calls visualizations
 # #     #calls pie chart
-#     v.pie_chart()
+    v.pie_chart()
 
 # #     #calls price histogram
 #     v.priceHistogram(cur, conn)
