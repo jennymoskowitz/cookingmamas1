@@ -23,7 +23,7 @@ class Recipies:
         return cur, conn
 
     #input: none
-    #output: return the 
+    #output: returns the response object for Spoonacular API
     #goes through the Spoonacular API to find 100 random recipies
     def get_recipies(self):
         url = 'https://api.spoonacular.com/recipes/random'
@@ -33,7 +33,7 @@ class Recipies:
         return response
 
     #input: none
-    #output: returning the dictionary keys
+    #output: returns the dictionary keys
     #goes through the recipies returned from the Spoonacular API and makes a dictionary of the cuisines found.
     def get_dict(self):
         dict1 = {}
@@ -50,7 +50,7 @@ class Recipies:
         return dict1.keys()
     
     #input: type of cuisine
-    #output: none
+    #output: returns the response object for Tasty API
     #goes through the tasty API to return 20 recipes of the given cuisine. 
     def get_tasty_recipes(self, cuisine):
         url = "https://tasty.p.rapidapi.com/recipes/list"
@@ -64,8 +64,8 @@ class Recipies:
         return response
 
     #input: type of cuisine
-    #output: none
-    #goes through the tasty database given the specified cuisine. Returns a list of the cuisine ingredients.
+    #output: Returns a list of the cuisine ingredients
+    #goes through the tasty database given the specified cuisine. 
     def get_ingredients(self, cuisine):
         cuisine_ingredients = []
         r = self.get_tasty_recipes(cuisine)
@@ -85,7 +85,9 @@ class Recipies:
 
         return cuisine_ingredients
 
-
+    #input: cursor and conncetion to the database to create a table within it
+    #output: creates categories table for Spoonacular in database --> look below for description
+    #sets up the categories table for Spoonacular within the database, if table exists, then only add to the existing database  
     def setUpCategoriesTable(self, cur, conn):
         cuisine_list = []
         r = self.get_recipies()
@@ -119,7 +121,7 @@ class Recipies:
 
     
     #input: type of cuisine, cursor and conncetion to the database to create a table within it
-    #output: none
+    #output: creates tasty table in database --> look below for description
     #sets up the Tasty table within the database, if table exists, then only add to the existing database  
 
     def get_tasty_database(self, cuisine, cur, conn):
@@ -200,7 +202,7 @@ class Recipies:
             conn.commit()
     
     #input: cursor and conncetion to the database to create a table within it
-    #output: none
+    #output: creates spoonacular table in database --> look below for description
     #sets up the Spoonacular table within the database, if table exists, then only add to the existing database  
 
     def get_spoon_database(self, cur, conn):
@@ -209,7 +211,7 @@ class Recipies:
         cur.execute("DROP TABLE IF EXISTS Spoonacular")
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Spoonacular' ''')
         if cur.fetchone()[0]==1:
-            for x in range(len(data['recipes'][0:20])):
+            for x in range(len(data['recipes'][0:20])): #run 20 each time
                 recipe_id = data['recipes'][x]["id"]
                 name = data['recipes'][x]['title']
                 if len(data['recipes'][x]['cuisines']) > 0:
@@ -256,18 +258,12 @@ class Recipies:
                 cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, cuisine, cuisine_id, str(ingredients)))
             conn.commit()
     
+   
+    #input: cursor, conncetion, and a list of ingredients 
+    #output: creates a Edamam table in database --> look below for description
+    #sets up the Edamam table within the database, if table exists, then only add to the existing database  
 
-    def join_Cuisine(self, cur, conn):
-        list_cuisines = []
-        cur.execute('''SELECT Spoonacular.name, Tasty.name
-        FROM Spoonacular
-        INNER JOIN Tasty
-        ON Spoonacular.cuisine_id = Tasty.cuisine_id''')
-        for row in cur:
-            list_cuisines.append(row)
-            print(row)
-
-    def get_edemam_database(self, ingredients):
+    def get_edemam_database(self, cur, conn, ingredients):
         
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Edemam' ''')
         if cur.fetchone()[0]==1:
@@ -289,8 +285,24 @@ class Recipies:
                 cur.execute('''INSERT OR REPLACE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories))
             conn.commit()
     
+    #input: cursor and conncetion to the database 
+    #output: joins the Tasty column in names with the carbs column in Edamam by their shared ingredients
+
+
+    def join_Ingredients(self, cur, conn):
+        list_ingredients = []
+        cur.execute('''SELECT Tasty.name, Edamam.carbs
+        FROM Tasty
+        INNER JOIN Edamam
+        ON Tasty.ingredients = Edamam.ingredients''')
+        for row in cur:
+            list_ingredients.append(row)
+            print(row)
+
+
+
     #input: type of cuisine
-    #output: none
+    #output: returns the top most common ingredients and sorts the values of the ingredients dictionary
     #goes through get_ingredients and sets the 5 most popular ingredients equal to variables. 
     def get_ingredients_lst(self, cuisine):
         ingredients = self.get_ingredients(cuisine)
@@ -313,7 +325,11 @@ class Recipies:
         for i in sorted_vals[0:4]:
             total += i
         return total 
-    
+
+    #input: none
+    #output: sets the top most common ingredients and sorts the values of the ingredients dictionary
+    #divides how
+
     def top_ingredients_percents(self):
         r = get_ingredients_lst(cuisine)
         i1_percent = sorted_vals[0] / r
@@ -325,9 +341,8 @@ class Recipies:
         other_percent = other_amount / r
 
 
-#input:none
-#output: none
-#Spoonacular bar graph of most popular cuisines and number of recipes.
+    #input: none
+    #output: Spoonacular bar graph of most popular cuisines and number of recipes.
 
     def spoonacular_visualization(self):
         r = Recipies()
@@ -341,10 +356,9 @@ class Recipies:
         plt.suptitle("Most Popular Cuisines")
         plt.show()
 
-    #most popular ingredients
+    
     #input: none
-    #output: none
-    #creates the pie chart breakdown of percent of recipes top 5 ingredients are in 
+    #output: Tasty Pie chart breakdown of percentage of recipes top 5 ingredients are in 
     def pie_chart(self):
         labels = i1, i2, i3, i4, i5, 'others'
         sizes = [self.i1_percent, self.i2_percent, self.i3_percent, self.i4_percent, self.i5_percent, self.other_percent]
@@ -357,8 +371,7 @@ class Recipies:
         plt.show()
 
     #input: cursor and conncetion to the database to access its data
-    #output: none
-    #creates the histogram of Average Calories by Cuisine Type
+    #output: creates the histogram of Average Calories by Cuisine Type
     def priceHistogram(self, cur, conn):
         #Events - Histogram
         numEvents = 0
@@ -385,7 +398,9 @@ class Recipies:
         plt.hist(sortedAveragePrices, bins=numEvents, range=None, density=None, weights=None, cumulative=False, bottom=None, histtype='bar', align='mid', orientation='vertical', rwidth=None, log=False, color=None, label=None, stacked=False, normed=None, data=None)
 
         plt.show()
-    
+
+    #input: none
+    #output: 
     def generate_scatter(self):
         np.random.seed(19680801)
         N = 50
@@ -400,9 +415,10 @@ class Recipies:
             plt.ylabel("Time in Seconds")
         plt.show()
     
-
-    def netcarb_graph(self):
-        r = Tasty()
+    #input: none
+    #output: 
+    def netcarb_graph(self, ingredients):
+        r = Recipe()
         dict1 = r.get_dict()
         fig = plt.figure(figsize = (10, 5))
         ax1 = fig.add_subplot(121)
@@ -410,8 +426,8 @@ class Recipies:
         ax2 = fig.add_subplot(121)
         ax2.bar([1,2,3], [3,4,5], color='yellow')
         #do i need both the ax plots and the fiber carb ones below?
-        carbs = get_carbs(self)
-        fiber = get_fiber(self)
+        carbs = r.get_carbs(ingredients)
+        fiber = r.get_fiber(ingredients)
         values = range(0,50)
         carb_bars = plt.bar(carbs, values, width = .5)
         fiber_bars = plt.bar(fiber, values, width = .5)
@@ -419,7 +435,7 @@ class Recipies:
         plt.show()
 
     #input: ingredients 
-    #output: none
+    #output: returns list of nutritional data based on ingredients list from get_ingredients
     #goes through the Edamam API to find the nutritional data of a given list of ingredients from get_ingredients.
     def get_nutrient_data(self, ingredients):
         url = "https://api.edamam.com/api/nutrition-data"
@@ -429,27 +445,17 @@ class Recipies:
             new_lst = []
             new_lst.append(ingredient)
     
-            querystring = {"app_id": "e29147b2", "app_key": "b34772921762c60de0b5875b765b707a", "ingr": new_lst}
+            querystring = {"app_id": "2fb619c7", "app_key": "67179bb588b2a6cacbf3cb39c237db72", "ingr": new_lst}
 
             response = requests.request("GET", url, params=querystring)
             response1 = json.loads(response.text)
             lst.append(response1)
 
         return lst
-    
-    # def get_nutrient_data(self, ingredients):
-    #     url = "https://api.edamam.com/api/nutrition-data"
-    #     querystring = {"app_id": "e29147b2", "app_key": "b34772921762c60de0b5875b765b707a", "ingr": ingredients}
-
-    #     response = requests.request("GET", url, params=querystring)
-            
-    #     print(response.text)
-    #     return response
-
 
     
     #input: ingredients 
-    #output: none
+    #output: returns total carb count for a given ingredients list
     #goes through the edamam database to find the total carbs for a given ingredients list.
     
     def get_carbs(self, ingredients):
@@ -459,37 +465,15 @@ class Recipies:
             if r[item]['totalNutrients'] != {}:
                 carb_quan = r[item]['totalNutrients']["CHOCDF"]["quantity"]
                 count += carb_quan
-            else:
-                print("No key")
         for item in range(len(r)):
             try:
                 carb_units = r[item]['totalNutrients']["CHOCDF"]["unit"]
             except:
                 carb_units = 'g'
-        print(str(count) + carb_units)
         return str(count) + carb_units
-        # if item['totalNutrients'] != {}:
-        #         fat_quantity = item['totalNutrients']["FAT"]['quantity']
-        #         count += fat_quantity
-        #     else:
-        #         print("no key")
-        # print(count)
-        # return str(count) + 'g'
-        # try:
-        #     count = 0
-        #     r = self.get_nutrient_data(ingredients)
-        #     data = json.loads(r.text)
-        #     carb_units = data['totalNutrients']["CHOCDF"]['unit']
-        #     for ingredient in ingredients:
-        #         carb_quantity = data['totalNutrients']["CHOCDF"]['quantity']
-        #         count += carb_quantity
-        #         print(carb_quantity, ingredient)
-        #     return str(count) + carb_units
-        # except:
-        #     return "data not found"
 
     #input: ingredients 
-    #output: none
+    #output:  returns total fiber count for a given ingredients list
     #goes through the edamam database to find the total fiber for a given ingredients list.
     def get_fiber(self, ingredients):
         count = 0
@@ -499,16 +483,16 @@ class Recipies:
                 fiber_quan = r[item]['totalNutrients']["FIBTG"]["quantity"]
                 count += fiber_quan
             except:
-                print("No key")
+                x = "no key"
         for item in range(len(r)):
             try:
                 fiber_units = r[item]['totalNutrients']["FIBTG"]["unit"]
             except:
                 fiber_units = 'g'
-        print(str(count) +  fiber_units)
         return str(count) + fiber_units
+
     #input: ingredients 
-    #output: none
+    #output:  returns total calorie count for a given ingredients list
     #goes through the edamam database to find the total calories for a given ingredients list.
     def get_calories(self, ingredients):
         count = 0
@@ -519,11 +503,14 @@ class Recipies:
                 calories = (r[item]['calories'])
                 count += calories
             except:
-                print("No key")
-        print(count)
+                y = "no key"
         return count
 
-
+    #input: cursor and conncetion to the database to access its data
+    #output: returns calculations from the data in each of the tables 
+    #for categories we calculate which cuisine has the most recipes for spoonacular we calculate number of recipes that don't have a cuisine 
+    #and from Tasty we calulate the average length of the ingredient list
+    #and from Edamam the greatest number of calories found in a given recipe
     def writeCalculations(self, cur, conn):
         path = os.path.dirname(os.path.abspath(__file__))
         f = open(path + "/Calculations.txt", "w+")
@@ -573,6 +560,23 @@ class Recipies:
         
 
         f.write("\n\n############################################\n\n")
+
+        #Edamam Calculation
+        f.write("\nRecipe with the Highest Calorie Count:\n\n")
+        sql = "SELECT ingredients, calories FROM Edamam"
+        cur.execute(sql)
+        max_calories = 0
+        for r in cur:
+            ingredients = r[0]
+            calories = int(r[1])
+            if calories > max_calories:
+                max_calories = calories
+        
+        f.write("The Highest Calories is = " + str(max_calories) + "\n")
+
+
+        f.write("\n\n############################################\n\n")
+
 
 
 
@@ -630,10 +634,27 @@ def main():
         #set up or accumulate to the tasty table
         v.get_tasty_database(r, cur, conn)
    
-        # for ingredients in tasty:
-        #     v.get_carbs(ingredients)
-        #     v.get_fiber(ingredients)
-        #     v.get_calories(ingredients)
+        #calls edamam and netcarb  
+        for ingredients in tasty:
+            v.get_edemam_database(cur, conn, ingredients)
+            v.netcarb_graph(ingredients)
+
+    #calls calculations
+    v.writeCalculations(cur, conn)
+
+    #calls join ingredients
+    v.join_Ingredients(cur, conn)
+
+#calls visualizations
+    #calls pie chart
+    v.pie_chart()
+
+    #calls price histogram
+    v.priceHistogram(cur, conn)
+
+    #calls generate scatter
+    v.generate_scatter()
+
 
 if __name__ == "__main__":
     main()
