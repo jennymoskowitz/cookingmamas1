@@ -400,20 +400,32 @@ class Recipies:
             plt.ylabel("Time in Seconds")
         plt.show()
     
+<<<<<<< HEAD
+    #input: 
+    #output:
+    def netcarb_graph(self):
+        carbs = get_carbs(self)
+        fiber = get_fiber(self)
+        values = range(0,50)
+=======
     #input: none
     #output: 
     def netcarb_graph(self, ingredients):
         r = Recipe()
         dict1 = r.get_dict()
+>>>>>>> b9df702ab2e4f7c627769b900f89fe4ab3b66448
         fig = plt.figure(figsize = (10, 5))
         ax1 = fig.add_subplot(121)
         ax1.bar([1,2,3], [3,4,5], color='blue')
         ax2 = fig.add_subplot(121)
         ax2.bar([1,2,3], [3,4,5], color='yellow')
         #do i need both the ax plots and the fiber carb ones below?
+<<<<<<< HEAD
+=======
         carbs = r.get_carbs(ingredients)
         fiber = r.get_fiber(ingredients)
         values = range(0,50)
+>>>>>>> b9df702ab2e4f7c627769b900f89fe4ab3b66448
         carb_bars = plt.bar(carbs, values, width = .5)
         fiber_bars = plt.bar(fiber, values, width = .5)
         plt.suptitle("Net Carbs of Ingredients")

@@ -1,0 +1,31 @@
+def netcarb_graph(self):
+    r = Tasty()
+    dict1 = r.get_dict()
+    fig = plt.figure(figsize = (10, 5))
+    ax1 = fig.add_subplot(121)
+    ax1.bar([1,2,3], [3,4,5], color='blue')
+    ax2 = fig.add_subplot(121)
+    ax2.bar([1,2,3], [3,4,5], color='yellow')
+    #do i need both the ax plots and the fiber carb ones below?
+    carbs = get_carbs(self)
+    fiber = get_fiber(self)
+    values = range(0,50)
+    carb_bars = plt.bar(carbs, values, width = .5)
+    fiber_bars = plt.bar(fiber, values, width = .5)
+    plt.suptitle("Net Carbs of Ingredients")
+    plt.show()
+
+def calories_scatter(self):
+        np.random.seed(19680801)
+        N = 50
+        srt = sorted(self.combos, key=lambda x: x[1])
+        for pair in srt:
+            x = pair[0]
+            y = pair[1]
+            if(pair[1] > 50000):
+                continue
+            plt.plot(x, y, 'o', c='blue')
+            plt.xlabel("Distance in Miles")
+            plt.ylabel("Time in Seconds")
+        plt.show()
+    
