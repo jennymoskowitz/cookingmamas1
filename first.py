@@ -27,7 +27,7 @@ class Recipies:
     #goes through the Spoonacular API to find 100 random recipies
     def get_recipies(self):
         url = 'https://api.spoonacular.com/recipes/random'
-        params = {"apiKey" : '3adec4cbad224f2c9596d4c011d346fc', "number" : "100"}
+        params = {"apiKey" : '3adec4cbad224f2c9596d4c011d346fc', "number" : "20"}
         response = requests.request("GET", url, params = params)
 
         return response
@@ -57,7 +57,7 @@ class Recipies:
  
         querystring = {"tags": cuisine, "from": 0,"sizes": 20}
 
-        headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "74c1de20bdmsh109b356a35082c3p1cf14cjsn37f52eca5a61"}
+        headers = {'x-rapidapi-host': "tasty.p.rapidapi.com",'x-rapidapi-key': "4815cec8ebmsh228e04eb0078c6fp11b92fjsnfb175b8eb0a0"}
 
         response = requests.request("GET", url, headers=headers, params=querystring)
 
@@ -70,7 +70,7 @@ class Recipies:
         cuisine_ingredients = []
         r = self.get_tasty_recipes(cuisine)
         data = json.loads(r.text)
-        for x in range(len(data['results'])):
+        for x in range(len(data['results'][0:4])):
             ingredients = []
             try:
                 for num in range(len(data['results'][x]['sections'])):
@@ -89,34 +89,19 @@ class Recipies:
     #output: creates categories table for Spoonacular in database --> look below for description
     #sets up the categories table for Spoonacular within the database, if table exists, then only add to the existing database  
     def setUpCategoriesTable(self, cur, conn):
-        cuisine_list = []
-        r = self.get_recipies()
-        data = json.loads(r.text)
+        cuisines = ["African", "American", "British", "Cajun", "Caribbean", "Chinese", "Eastern European", "European",
+        "French", "German", "Greek", "Indian", "Irish", "Italian", "Japanese", "Jewish", "Korean", "Latin American", 
+        "Mediterranean", "Mexican", "Middle Eastern", "Nordic", "Southern", "Spanish", "Thai", "Vietnamese", "Cuisine not classified"]
+        cur.execute("DROP TABLE IF EXISTS Categories")
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Categories' ''')
         if cur.fetchone()[0]==1:
-            for x in range(len(data['recipes'])):
-                if len(data['recipes'][x]['cuisines']) > 0:
-                    cuisine = data['recipes'][x]['cuisines'][0]
-                else:
-                    cuisine = "Cuisine not classified"
-                for c in cuisine_list:
-                    if cuisine not in cuisine_list:
-                        cuisine_list.append(cuisine)
-            for i in range(len(cuisine_list)):
-                cur.execute("INSERT INTO Categories (id,title) VALUES (?,?)",(i,cuisine_list[i]))
+            for i in range(len(cuisines)):
+                cur.execute("INSERT OR REPLACE INTO Categories (id,title) VALUES (?,?)",(i,cuisines[i]))
             conn.commit()
         else:
             cur.execute("CREATE TABLE Categories (id INTEGER PRIMARY KEY, title TEXT)")
-            for x in range(len(data['recipes'])):
-                if len(data['recipes'][x]['cuisines']) > 0:
-                    cuisine = data['recipes'][x]['cuisines'][0]
-                else:
-                    cuisine = "Cuisine not classified"
-                for c in cuisine_list:
-                    if cuisine not in cuisine_list:
-                        cuisine_list.append(cuisine)
-            for i in range(len(cuisine_list)):
-                cur.execute("INSERT INTO Categories (id,title) VALUES (?,?)",(i,cuisine_list[i]))
+            for i in range(len(cuisines)):
+                cur.execute("INSERT OR REPLACE INTO Categories (id,title) VALUES (?,?)",(i,cuisines[i]))
             conn.commit()
 
     
@@ -130,7 +115,7 @@ class Recipies:
         cur.execute("DROP TABLE IF EXISTS Tasty")
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Tasty' ''')
         if cur.fetchone()[0]==1:
-            for x in range(len(data['results'])):
+            for x in range(len(data['results'][0:4])):
                 recipe_id = data['results'][x]["id"]
                 try:
                     name = data["results"][x]["name"]
@@ -166,7 +151,7 @@ class Recipies:
             conn.commit()
         else:
             cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, cuisine_id INTEGER, ingredients TEXT)''')
-            for x in range(len(data['results'])):
+            for x in range(len(data['results'][0:4])):
                 recipe_id = data['results'][x]["id"]
                 try:
                     name = data["results"][x]["name"]
@@ -635,26 +620,31 @@ def main():
         #set up or accumulate to the tasty table
         v.get_tasty_database(r, cur, conn)
    
-        #calls edamam and netcarb  
+# #         #calls edamam and netcarb  
         for ingredients in tasty:
-            v.get_edemam_database(cur, conn, ingredients)
-            v.netcarb_graph(ingredients)
+            a = v.get_carbs(ingredients)
+            print(a)
+            b = v.get_fiber(ingredients)
+            print(b)
+            c = v.get_calories(ingredients)
+            print(c)
+            # v.netcarb_graph(ingredients)
 
-    #calls calculations
-    v.writeCalculations(cur, conn)
+# #     #calls calculations
+    # v.writeCalculations(cur, conn)
 
-    #calls join ingredients
-    v.join_Ingredients(cur, conn)
+# #     #calls join ingredients
+#     v.join_Ingredients(cur, conn)
 
-#calls visualizations
-    #calls pie chart
-    v.pie_chart()
+# # #calls visualizations
+# #     #calls pie chart
+#     v.pie_chart()
 
-    #calls price histogram
-    v.priceHistogram(cur, conn)
+# #     #calls price histogram
+#     v.priceHistogram(cur, conn)
 
-    #calls generate scatter
-    v.generate_scatter()
+# #     #calls generate scatter
+#     v.generate_scatter()
 
 
 if __name__ == "__main__":
