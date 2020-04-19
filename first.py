@@ -282,14 +282,11 @@ class Recipies:
     #output: joins the Tasty column in names with the carbs column in Edamam by their shared ingredients
 
 
-    def join_Ingredients(self, cur, conn):
-        list_ingredients = []
-        cur.execute('''SELECT Tasty.name, Edemam.carbs
-        FROM Tasty
-        INNER JOIN Edemam
-        ON Tasty.ingredients = Edemam.ingredients''')
+    def join_recipies(self, cur, conn):
+        list_names = []
+        cur.execute('''SELECT Tasty.name, Tasty.cuisine FROM Tasty JOIN Spoonacular ON Tasty.cuisine_id = Spoonacular.cuisine_id''')
         for row in cur:
-            list_ingredients.append(row)
+            list_names.append(row)
             print(row)
 
 
@@ -353,7 +350,7 @@ class Recipies:
         names = dict1.keys()
         values = dict1.values()
         ax1.bar(names, values, color='pink')
-        # plt.bar(names, values)
+        plt.xticks(rotation=45, size= 6)
         plt.suptitle("Most Popular Cuisines")
         plt.show()
 
@@ -675,27 +672,23 @@ def main():
         v.get_tasty_database(r, cur, conn)
         # v.pie_chart(r)
    
-# #         #calls edamam and netcarb  
+        #calls edamam and netcarb  
         for ingredients in tasty:
             v.get_edemam_database(cur, conn, ingredients)
             # v.netcarb_graph(ingredients)
 
-# #     #calls calculations
+    #calls calculations
     v.writeCalculations(cur, conn)
 
-# #     #calls join ingredients
-    
-#     v.join_Ingredients(cur, conn)
-    # v.spoonacular_visualization()
+ #calls join recipies
+    v.join_recipies(cur, conn)
+
     random_index = random.randrange(len(r_list))
-    print(random_index)
 # # #calls visualizations
-# #     #calls pie chart
+    #calls pie chart
     # v.pie_chart(r_list[random_index])
-    # v.caloriesHistogram()
+
     v.spoonacular_visualization()
-# #     #calls price histogram
-#     v.priceHistogram(cur, conn)
 
 # #     #calls generate scatter
 #     v.generate_scatter()
