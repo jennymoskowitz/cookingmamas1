@@ -500,14 +500,15 @@ class Recipies:
         sql = "SELECT title FROM Categories"
         cur.execute(sql)
         dict_cuisine = {}
-        for title in cur:
+        for t in cur:
+            title = t[0]
             if title not in dict_cuisine:
                 dict_cuisine[title] = 0
                 dict_cuisine[title] += 1
             else:
                 dict_cuisine[title] += 1          
         sorted_dict = sorted(dict_cuisine.items(), reverse= True, key = lambda t: t[1])
-        f.write("Most Recipies = " + str(sorted_dict[0]) + "\n")
+        f.write("Most Recipies = " + str(sorted_dict[0][0]) + "\n")
 
 
         f.write("\n\n############################################\n\n")
@@ -517,7 +518,8 @@ class Recipies:
         sql = "SELECT cuisine FROM Spoonacular"
         cur.execute(sql)
         count = 0
-        for cuisine in cur:
+        for c in cur:
+            cuisine = c[0]
             if cuisine == "Cuisine not classified":
                 count += 1
                 
