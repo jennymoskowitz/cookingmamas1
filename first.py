@@ -534,7 +534,7 @@ class Recipies:
         recipies = 0
         ingredients = 0
         for r in cur:
-            ing_list = list(r)
+            ing_list = r[0].strip('[ ]').split(',')
             ingredients += len(ing_list)
             recipies += 1
         if recipies != 0:
