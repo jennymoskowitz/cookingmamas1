@@ -1,1 +1,31 @@
- 
+
+Cuisine with the most recipies:
+
+Most Recipies = (('African',), 1)
+
+
+############################################
+
+Amount of Recipies Without a Cuisine:
+
+Amount of Recipies Without a Cuisine: 0
+
+
+############################################
+
+
+Average of Ingredients List:
+
+Average of Ingredients List = 1.0
+
+
+############################################
+
+
+Recipe with the Highest Calorie Count:
+
+The Highest Calories is = 6406
+
+
+############################################
+
