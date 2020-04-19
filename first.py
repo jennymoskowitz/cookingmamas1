@@ -437,78 +437,31 @@ class Recipies:
     
     #input: 
     #output:
-    def netcarb_graph(self, ingredients):
+     def netcarb_graph(self, ingredients):
+
+        carbs = self.get_carbs(ingredients)
+        
+        fiber = self.get_fiber(ingredients)
 
 
-        cur.execute("SELECT * from Edemam")
-        for row in cur:
-            ingredients = row[0]
-            carbs = row[1]
-            fiber = row[2]
-        carbs = np.arange(self.get_carbs(ingredients))
-        fiber = np.arange(self.get_fiber(ingredients))
-
-        N = len(ingredients)
-        ind = np.arange(N)
-        width = 0.5
-        height = 10
-        plt.title("Net Carbs of Ingredients")
-        plt.bar(carbs, width, height, color='blue')
-        plt.bar(fiber, width, height, bottom=carbs, color='yellow')
-        plt.ylim([0,50])
-        plt.yticks(np.arange(0, 50, 5))
+        
+        ind = np.arange(1)
+        width = 0.05
+        
+        plt.title("Net Carbs of Recipe")
+        #x = np.arange(len(carbs))
+        plt.bar(ind, carbs, width, color = 'blue')
+        #carb_bars = plt.bar(carbs, width, height, color='blue')
+       # y = np.arange(len(fiber))
+        plt.bar(ind, fiber, width, bottom=carbs, color='yellow')
+        # plt.yticks(np.arange(0, 50, 5))
         plt.ylabel('Nutrient in Grams')
-        plt.xticks(ind)
-        plt.xlabel('Tasty Recipe Ingredients')
-        #plt.legend((carb_bars, fiber_bars), ('Carbs', 'Fiber'))
+        plt.xticks(ind, ("recipe",))
+        #plt.set_xticks(ind, (recipe))
+        plt.xlabel('Tasty Recipe')
+        plt.legend(labels=['Carb', 'Fiber'])
+        #plt.legend((carbs, fiber), ('Carbs', 'Fiber'))
         plt.show()
-        # carbs = self.get_carbs(ingredients)
-        # fiber = self.get_fiber(ingredients)
-        # fig = plt.figure(figsize = (10, 5))
-        # # plt.title("Net Carbs of Ingredients")
-        # # plt.ylabel('Nutrient in Grams')
-        # # plt.xlabel("Tasty Recipe Ingredients")
-        # # carb_bars = plt.bar(carbs, width = .5, height = 10, color = 'yellow') #correct
-        # # fiber_bars = plt.bar(fiber, bottom=carbs, width = .5, height = 10, color = 'blue') #correct
-        # # plt.legend((carb_bars[0], fiber_bars[0]), ('Carb', 'Fiber'))
-        # # plt.yticks(np.arange(0, 50, 5))
-        # # plt.show()
-
-
-        # fig, ax = plt.subplots()
-        
-        # ax.bar(int(carbs),  width = .5, height = 10, color = 'yellow')
-        # ax.bar(int(fiber), bottom=carbs, width = .5, height = 10, color = 'blue')
-        # ax.set_ylabel('Nutrient in Grams')
-        # ax.set_title("Net Carbs of Ingredients")
-        # ax.legend()
-        # plt.show()
-        # # #do i need both the ax plots and the fiber carb ones below?
-        
-        # # plt.suptitle("Net Carbs of Ingredients")
-        
-
-        
-
-        # # N = 5
-        # # menMeans = (20, 35, 30, 35, 27)
-        # # womenMeans = (25, 32, 34, 20, 25)
-        # # menStd = (2, 3, 4, 1, 2)
-        # # womenStd = (3, 5, 2, 3, 3)
-        # # ind = np.arange(N)    # the x locations for the groups
-        # # width = 0.35       # the width of the bars: can also be len(x) sequence
-
-        # p1 = plt.bar(ind, menMeans, width, yerr=menStd)
-        # p2 = plt.bar(ind, womenMeans, width,
-        #             bottom=menMeans, yerr=womenStd)
-
-        
-        # plt.title('Scores by group and gender')
-        # plt.xticks(ind, ('G1', 'G2', 'G3', 'G4', 'G5'))
-        # plt.yticks(np.arange(0, 81, 10))
-        # plt.legend((p1[0], p2[0]), ('Men', 'Women'))
-
-        # plt.show()
 
     #input: ingredients 
     #output: returns list of nutritional data based on ingredients list from get_ingredients
@@ -521,7 +474,7 @@ class Recipies:
             new_lst = []
             new_lst.append(ingredient)
     
-            querystring = {"app_id": "6630776c", "app_key": "15d28378bd93ee4477e0a61ad05df9b4", "ingr": new_lst}
+            querystring = {"app_id": "7e84e824", "app_key": "3ad7d55a21c8dfe344d9ce7778aa48fe", "ingr": new_lst}
 
             response = requests.request("GET", url, params=querystring)
             response1 = json.loads(response.text)
