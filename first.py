@@ -399,24 +399,18 @@ class Recipies:
         
         fiber = self.get_fiber(ingredients)
 
-
-        
         ind = np.arange(1)
-        width = 0.05
+        width = 0.5
         
         plt.title("Net Carbs of Recipe")
-        #x = np.arange(len(carbs))
+
         plt.bar(ind, carbs, width, color = 'blue')
-        #carb_bars = plt.bar(carbs, width, height, color='blue')
-       # y = np.arange(len(fiber))
+
         plt.bar(ind, fiber, width, bottom=carbs, color='yellow')
-        # plt.yticks(np.arange(0, 50, 5))
         plt.ylabel('Nutrient in Grams')
-        plt.xticks(ind, ("recipe",))
-        #plt.set_xticks(ind, (recipe))
+        plt.xticks(ind, ("Ingrediets",), fontsize = 6)
         plt.xlabel('Tasty Recipe')
         plt.legend(labels=['Carb', 'Fiber'])
-        #plt.legend((carbs, fiber), ('Carbs', 'Fiber'))
         plt.show()
 
     #input: ingredients 
@@ -430,7 +424,7 @@ class Recipies:
             new_lst = []
             new_lst.append(ingredient)
     
-            querystring = {"app_id": "7e84e824", "app_key": "3ad7d55a21c8dfe344d9ce7778aa48fe", "ingr": new_lst}
+            querystring = {"app_id": "ee05f047", "app_key": "f31b39449ff072c15a0dc0d0612f8662", "ingr": new_lst}
 
             response = requests.request("GET", url, params=querystring)
             response1 = json.loads(response.text)
