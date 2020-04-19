@@ -375,32 +375,45 @@ class Recipies:
 
     #input: cursor and conncetion to the database to access its data
     #output: creates the histogram of Average Calories by Cuisine Type
-    def priceHistogram(self, cur, conn):
-        #Events - Histogram
-        numEvents = 0
-        calories = cur.execute("SELECT Min_Price, Max_Price FROM Event_Prices")
+    def caloriesHistogram(self, cur, conn):
+        list1 = []
+        cur.execute('''SELECT Tasty.cuisine, Edamam.calories
+        FROM Tasty
+        INNER JOIN Edamam
+        ON Tasty.ingredients = Edamam.ingredients''')
+        calorie_dict = {}
+        recipie_dict = {}
+        for row in cur:
+            list1.append(row)
 
-        averagePrices = []
-
-        for minp, maxp in prices:
-            if minp != "n/a" and maxp != "n/a":
-                avg = (float(minp) + float(maxp))/2
-                averagePrices.append(avg)
-            numEvents += 1
+        for r in list1:
+            if r[0] in calorie_dict:
+                calorie_dict[r[0]] += r[1]
+                recipie_dict[0] += 1
+            else:
+                calorie_dict[r[0]] = 0
+                calorie_dict[r[0]] += r[1]
+                recipie_dict[0] = 0
+                recipie_dict[0] += 1
         
-        #print(averagePrices)
-        sortedAveragePrices = sorted(averagePrices)
-        #print(sortedAveragePrices)
-
+        cuisine_dict = {}
+        for x in calorie_dict.keys():
+            avg_cal = calorie_dict[x] / recipie_dict[x]
+            cuisine_dict[x] = 0
+            cuisine_dict[x] += avg_cal
+        
+       
+        sorted_cuisinedict = sorted(cuisine_dict.values())
         plt.xlabel("Cuisine Type")
         plt.ylabel("Average Number of Calories")
         plt.title("Histogram of Average Calories of Recipes by Cusine Type")
-        plt.xlim(sortedAveragePrices[0], sortedAveragePrices[-1])
+        plt.xlim(sorted_cuisinedict[0], sorted_cuisinedict[-1])
         plt.ylim(0, 15)
 
         plt.hist(sortedAveragePrices, bins=numEvents, range=None, density=None, weights=None, cumulative=False, bottom=None, histtype='bar', align='mid', orientation='vertical', rwidth=None, log=False, color=None, label=None, stacked=False, normed=None, data=None)
 
         plt.show()
+
 
     #input: none
     #output: 
@@ -577,7 +590,7 @@ class Recipies:
             else:
                 dict_cuisine[title] += 1          
         sorted_dict = sorted(dict_cuisine.items(), reverse= True, key = lambda t: t[1])
-        f.write("Most Recipies = " + sorted_dict[0] + "\n")
+        f.write("Most Recipies = " + str(sorted_dict[0]) + "\n")
 
 
         f.write("\n\n############################################\n\n")
@@ -605,7 +618,10 @@ class Recipies:
             ing_list = list(r)
             ingredients += len(ing_list)
             recipies += 1
-        avg = ingredients / recipies
+        if recipies != 0:
+            avg = ingredients / recipies
+        else:
+            avg = ingredients
         f.write("Average of Ingredients List = " + str(avg) + "\n")
         
 
@@ -613,7 +629,7 @@ class Recipies:
 
         #Edamam Calculation
         f.write("\nRecipe with the Highest Calorie Count:\n\n")
-        sql = "SELECT ingredients, calories FROM Edamam"
+        sql = "SELECT ingredients, calories FROM Edemam"
         cur.execute(sql)
         max_calories = 0
         for r in cur:
@@ -626,7 +642,6 @@ class Recipies:
 
 
         f.write("\n\n############################################\n\n")
-
 
 
 
