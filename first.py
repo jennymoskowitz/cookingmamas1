@@ -47,7 +47,7 @@ class Recipies:
                 dict1[data['recipes'][x]['cuisines'][0]] += 1
             # else:
             #     print("Cuisine not found.")
-        return dict1.keys()
+        return dict1
     
     #input: type of cuisine
     #output: returns the response object for Tasty API
@@ -98,12 +98,12 @@ class Recipies:
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Categories' ''')
         if cur.fetchone()[0]==1:
             for i in range(len(cuisines)):
-                cur.execute("INSERT OR REPLACE INTO Categories (id,title) VALUES (?,?)",(i,cuisines[i]))
+                cur.execute("INSERT OR IGNORE INTO Categories (id,title) VALUES (?,?)",(i,cuisines[i]))
             conn.commit()
         else:
             cur.execute("CREATE TABLE Categories (id INTEGER PRIMARY KEY, title TEXT)")
             for i in range(len(cuisines)):
-                cur.execute("INSERT OR REPLACE INTO Categories (id,title) VALUES (?,?)",(i,cuisines[i]))
+                cur.execute("INSERT OR IGNORE INTO Categories (id,title) VALUES (?,?)",(i,cuisines[i]))
             conn.commit()
 
     
@@ -150,7 +150,7 @@ class Recipies:
                                 for n in range(len(data['results'][x]["recipes"][num]['sections'])):
                                     for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
                                         ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                        cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
+                        cur.execute('''INSERT OR IGNORE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
                     conn.commit()
                 except:
                     pass
@@ -189,7 +189,7 @@ class Recipies:
                                 for n in range(len(data['results'][x]["recipes"][num]['sections'])):
                                     for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
                                         ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                        cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
+                        cur.execute('''INSERT OR IGNORE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
                     conn.commit()
                 except:
                     pass
@@ -249,7 +249,7 @@ class Recipies:
                     for n in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'])):
                         for j in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'])):
                             ingredients.append(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'][j]['name'])
-                    cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, cuisine, cuisine_id, str(ingredients)))
+                    cur.execute('''INSERT OR IGNORE INTO Spoonacular (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, cuisine, cuisine_id, str(ingredients)))
                 conn.commit()
         except:
             print("Ran into Json Decode Error")
@@ -266,7 +266,7 @@ class Recipies:
             carbs = self.get_carbs(ingredients)
             fiber = self.get_fiber(ingredients)
             calories = self.get_calories(ingredients)
-            cur.execute('''INSERT OR REPLACE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories)) 
+            cur.execute('''INSERT OR IGNORE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories)) 
             conn.commit()
 
         else:
@@ -275,7 +275,7 @@ class Recipies:
             carbs = self.get_carbs(ingredients)
             fiber = self.get_fiber(ingredients)
             calories = self.get_calories(ingredients)
-            cur.execute('''INSERT OR REPLACE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories))
+            cur.execute('''INSERT OR IGNORE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories))
             conn.commit()
     
     #input: cursor and conncetion to the database 
@@ -284,10 +284,10 @@ class Recipies:
 
     def join_Ingredients(self, cur, conn):
         list_ingredients = []
-        cur.execute('''SELECT Tasty.name, Edamam.carbs
+        cur.execute('''SELECT Tasty.name, Edemam.carbs
         FROM Tasty
-        INNER JOIN Edamam
-        ON Tasty.ingredients = Edamam.ingredients''')
+        INNER JOIN Edemam
+        ON Tasty.ingredients = Edemam.ingredients''')
         for row in cur:
             list_ingredients.append(row)
             print(row)
@@ -350,10 +350,10 @@ class Recipies:
         dict1 = self.get_dict()
         fig = plt.figure(figsize = (10, 5))
         ax1 = fig.add_subplot(121)
-        ax1.bar([1,2,3], [3,4,5], color='pink')
         names = dict1.keys()
         values = dict1.values()
-        plt.bar(names, values)
+        ax1.bar(names, values, color='pink')
+        # plt.bar(names, values)
         plt.suptitle("Most Popular Cuisines")
         plt.show()
 
@@ -380,10 +380,10 @@ class Recipies:
     #output: creates the histogram of Average Calories by Cuisine Type
     def caloriesHistogram(self, cur, conn):
         list1 = []
-        cur.execute('''SELECT Tasty.cuisine, Edamam.calories
+        cur.execute('''SELECT Tasty.cuisine, Edemam.calories
         FROM Tasty
-        INNER JOIN Edamam
-        ON Tasty.ingredients = Edamam.ingredients''')
+        INNER JOIN Edemam
+        ON Tasty.ingredients = Edemam.ingredients''')
         calorie_dict = {}
         recipie_dict = {}
         for row in cur:
@@ -406,16 +406,26 @@ class Recipies:
             cuisine_dict[x] += avg_cal
         
        
-        sorted_cuisinedict = sorted(cuisine_dict.values())
-        plt.xlabel("Cuisine Type")
-        plt.ylabel("Average Number of Calories")
-        plt.title("Histogram of Average Calories of Recipes by Cusine Type")
-        plt.xlim(sorted_cuisinedict[0], sorted_cuisinedict[-1])
-        plt.ylim(0, 15)
-
-        plt.hist(sortedAveragePrices, bins=numEvents, range=None, density=None, weights=None, cumulative=False, bottom=None, histtype='bar', align='mid', orientation='vertical', rwidth=None, log=False, color=None, label=None, stacked=False, normed=None, data=None)
-
+        sorted_cuisinedict = sorted(cuisine_dict.items())
+        fig = plt.figure(figsize = (10, 5))
+        ax1 = fig.add_subplot(121)
+        ax1.bar([1,2,3], [3,4,5], color='pink')
+        cuisines = sorted_cuisinedict[0]
+        calories = sorted_cuisinedict[1]
+        plt.bar(cuisines, calories)
+        plt.suptitle("Average Calories of Recipes by Cusine Type")
         plt.show()
+        
+        
+        # plt.xlabel("Cuisine Type")
+        # plt.ylabel("Average Number of Calories")
+        # plt.title("Histogram of Average Calories of Recipes by Cusine Type")
+        # plt.xlim(sorted_cuisinedict[0], sorted_cuisinedict[-1])
+        # plt.ylim(0, 15)
+
+        # plt.hist(sortedAveragePrices, bins=numEvents, range=None, density=None, weights=None, cumulative=False, bottom=None, histtype='bar', align='mid', orientation='vertical', rwidth=None, log=False, color=None, label=None, stacked=False, normed=None, data=None)
+
+        # plt.show()
 
 
     #input: none
@@ -437,7 +447,7 @@ class Recipies:
     
     #input: 
     #output:
-     def netcarb_graph(self, ingredients):
+    def netcarb_graph(self, ingredients):
 
         carbs = self.get_carbs(ingredients)
         
@@ -633,7 +643,7 @@ def main():
 
     # get recipies from spoonacular and then get a dictionary of the different cuisines and the amount of recipies
     # that have each then return a list of the cuisines
-    cuisines = v.get_dict()
+    cuisines = v.get_dict().keys()
 
     v.setUpCategoriesTable(cur, conn)
     #set up or accumulate to the spoonacular table
@@ -681,8 +691,9 @@ def main():
     print(random_index)
 # # #calls visualizations
 # #     #calls pie chart
-    v.pie_chart(r_list[random_index])
-
+    # v.pie_chart(r_list[random_index])
+    # v.caloriesHistogram()
+    v.spoonacular_visualization()
 # #     #calls price histogram
 #     v.priceHistogram(cur, conn)
 
