@@ -378,7 +378,7 @@ class Recipies:
     def priceHistogram(self, cur, conn):
         #Events - Histogram
         numEvents = 0
-        prices = cur.execute("SELECT Min_Price, Max_Price FROM Event_Prices")
+        calories = cur.execute("SELECT Min_Price, Max_Price FROM Event_Prices")
 
         averagePrices = []
 
@@ -404,6 +404,7 @@ class Recipies:
 
     #input: none
     #output: 
+    # calories and ingredients
     def generate_scatter(self):
         np.random.seed(19680801)
         N = 50
@@ -423,17 +424,51 @@ class Recipies:
     def netcarb_graph(self, ingredients):
         carbs = self.get_carbs(ingredients)
         fiber = self.get_fiber(ingredients)
-        values = range(0,50)
         fig = plt.figure(figsize = (10, 5))
-        ax1 = fig.add_subplot(121)
-        ax1.bar([1,2,3], [3,4,5], color='blue')
-        ax2 = fig.add_subplot(121)
-        ax2.bar([1,2,3], [3,4,5], color='yellow')
-        #do i need both the ax plots and the fiber carb ones below?
-        carb_bars = plt.bar(carbs, values, width = .5)
-        fiber_bars = plt.bar(fiber, values, width = .5)
-        plt.suptitle("Net Carbs of Ingredients")
+        # plt.title("Net Carbs of Ingredients")
+        # plt.ylabel('Nutrient in Grams')
+        # plt.xlabel("Tasty Recipe Ingredients")
+        # carb_bars = plt.bar(carbs, width = .5, height = 10, color = 'yellow') #correct
+        # fiber_bars = plt.bar(fiber, bottom=carbs, width = .5, height = 10, color = 'blue') #correct
+        # plt.legend((carb_bars[0], fiber_bars[0]), ('Carb', 'Fiber'))
+        # plt.yticks(np.arange(0, 50, 5))
+        # plt.show()
+
+
+        fig, ax = plt.subplots()
+        
+        ax.bar(int(carbs),  width = .5, height = 10, color = 'yellow')
+        ax.bar(int(fiber), bottom=carbs, width = .5, height = 10, color = 'blue')
+        ax.set_ylabel('Nutrient in Grams')
+        ax.set_title("Net Carbs of Ingredients")
+        ax.legend()
         plt.show()
+        # #do i need both the ax plots and the fiber carb ones below?
+        
+        # plt.suptitle("Net Carbs of Ingredients")
+        
+
+        
+
+        # N = 5
+        # menMeans = (20, 35, 30, 35, 27)
+        # womenMeans = (25, 32, 34, 20, 25)
+        # menStd = (2, 3, 4, 1, 2)
+        # womenStd = (3, 5, 2, 3, 3)
+        # ind = np.arange(N)    # the x locations for the groups
+        # width = 0.35       # the width of the bars: can also be len(x) sequence
+
+        # p1 = plt.bar(ind, menMeans, width, yerr=menStd)
+        # p2 = plt.bar(ind, womenMeans, width,
+        #             bottom=menMeans, yerr=womenStd)
+
+        
+        # plt.title('Scores by group and gender')
+        # plt.xticks(ind, ('G1', 'G2', 'G3', 'G4', 'G5'))
+        # plt.yticks(np.arange(0, 81, 10))
+        # plt.legend((p1[0], p2[0]), ('Men', 'Women'))
+
+        # plt.show()
 
     #input: ingredients 
     #output: returns list of nutritional data based on ingredients list from get_ingredients
@@ -467,12 +502,7 @@ class Recipies:
                 count += carb_quantity
             except:
                 y = "no key"
-        for item in range(len(r)):
-            try:
-                carb_units = r[item]['totalNutrients']["CHOCDF"]["unit"]
-            except:
-                carb_units = 'g'
-        return str(count) + carb_units
+        return str(count) 
 
     #input: ingredients 
     #output:  returns total fiber count for a given ingredients list
@@ -486,12 +516,12 @@ class Recipies:
                 count += fiber_quan
             except:
                 py = "no key"
-        for item in range(len(r)):
-            try:
-                fiber_units = r[item]['totalNutrients']["FIBTG"]["unit"]
-            except:
-                fiber_units = 'g'
-        return str(count) + fiber_units
+        # for item in range(len(r)):
+        #     try:
+        #         fiber_units = r[item]['totalNutrients']["FIBTG"]["unit"]
+        #     except:
+        #         fiber_units = 'g'
+        return str(count) 
 
     #input: ingredients 
     #output:  returns total calorie count for a given ingredients list
@@ -633,7 +663,7 @@ def main():
             r = rec[0].lower() + rec[1:]
         # input the cuisine into the tasty api and output a list of ingredients for each recipie for the cuisine
         tasty = v.get_ingredients(r)
-        print(tasty)
+        
 
         #set up or accumulate to the tasty table
         v.get_tasty_database(r, cur, conn)
