@@ -422,41 +422,60 @@ class Recipies:
     #input: 
     #output:
     def netcarb_graph(self, ingredients):
-        carbs = self.get_carbs(ingredients)
-        fiber = self.get_fiber(ingredients)
-        fig = plt.figure(figsize = (10, 5))
-        # plt.title("Net Carbs of Ingredients")
-        # plt.ylabel('Nutrient in Grams')
-        # plt.xlabel("Tasty Recipe Ingredients")
-        # carb_bars = plt.bar(carbs, width = .5, height = 10, color = 'yellow') #correct
-        # fiber_bars = plt.bar(fiber, bottom=carbs, width = .5, height = 10, color = 'blue') #correct
-        # plt.legend((carb_bars[0], fiber_bars[0]), ('Carb', 'Fiber'))
-        # plt.yticks(np.arange(0, 50, 5))
-        # plt.show()
+
+        carbs = np.arange(self.get_carbs(ingredients))
+        fiber = np.arange(self.get_fiber(ingredients))
 
 
-        fig, ax = plt.subplots()
-        
-        ax.bar(int(carbs),  width = .5, height = 10, color = 'yellow')
-        ax.bar(int(fiber), bottom=carbs, width = .5, height = 10, color = 'blue')
-        ax.set_ylabel('Nutrient in Grams')
-        ax.set_title("Net Carbs of Ingredients")
-        ax.legend()
+        N = len(ingredients)
+        ind = np.arange(N)
+        width = 0.5
+        height = 10
+        plt.title("Net Carbs of Ingredients")
+        plt.bar(carbs, width, height, color='blue')
+        plt.bar(fiber, width, height, bottom=carbs, color='yellow')
+        plt.ylim([0,50])
+        plt.yticks(np.arange(0, 50, 5))
+        plt.ylabel('Nutrient in Grams')
+        plt.xticks(ind)
+        plt.xlabel('Tasty Recipe Ingredients')
+        #plt.legend((carb_bars, fiber_bars), ('Carbs', 'Fiber'))
         plt.show()
-        # #do i need both the ax plots and the fiber carb ones below?
+        # carbs = self.get_carbs(ingredients)
+        # fiber = self.get_fiber(ingredients)
+        # fig = plt.figure(figsize = (10, 5))
+        # # plt.title("Net Carbs of Ingredients")
+        # # plt.ylabel('Nutrient in Grams')
+        # # plt.xlabel("Tasty Recipe Ingredients")
+        # # carb_bars = plt.bar(carbs, width = .5, height = 10, color = 'yellow') #correct
+        # # fiber_bars = plt.bar(fiber, bottom=carbs, width = .5, height = 10, color = 'blue') #correct
+        # # plt.legend((carb_bars[0], fiber_bars[0]), ('Carb', 'Fiber'))
+        # # plt.yticks(np.arange(0, 50, 5))
+        # # plt.show()
+
+
+        # fig, ax = plt.subplots()
         
-        # plt.suptitle("Net Carbs of Ingredients")
+        # ax.bar(int(carbs),  width = .5, height = 10, color = 'yellow')
+        # ax.bar(int(fiber), bottom=carbs, width = .5, height = 10, color = 'blue')
+        # ax.set_ylabel('Nutrient in Grams')
+        # ax.set_title("Net Carbs of Ingredients")
+        # ax.legend()
+        # plt.show()
+        # # #do i need both the ax plots and the fiber carb ones below?
+        
+        # # plt.suptitle("Net Carbs of Ingredients")
         
 
         
 
-        # N = 5
-        # menMeans = (20, 35, 30, 35, 27)
-        # womenMeans = (25, 32, 34, 20, 25)
-        # menStd = (2, 3, 4, 1, 2)
-        # womenStd = (3, 5, 2, 3, 3)
-        # ind = np.arange(N)    # the x locations for the groups
-        # width = 0.35       # the width of the bars: can also be len(x) sequence
+        # # N = 5
+        # # menMeans = (20, 35, 30, 35, 27)
+        # # womenMeans = (25, 32, 34, 20, 25)
+        # # menStd = (2, 3, 4, 1, 2)
+        # # womenStd = (3, 5, 2, 3, 3)
+        # # ind = np.arange(N)    # the x locations for the groups
+        # # width = 0.35       # the width of the bars: can also be len(x) sequence
 
         # p1 = plt.bar(ind, menMeans, width, yerr=menStd)
         # p2 = plt.bar(ind, womenMeans, width,
@@ -502,7 +521,7 @@ class Recipies:
                 count += carb_quantity
             except:
                 y = "no key"
-        return str(count) 
+        return count 
 
     #input: ingredients 
     #output:  returns total fiber count for a given ingredients list
@@ -521,7 +540,7 @@ class Recipies:
         #         fiber_units = r[item]['totalNutrients']["FIBTG"]["unit"]
         #     except:
         #         fiber_units = 'g'
-        return str(count) 
+        return count
 
     #input: ingredients 
     #output:  returns total calorie count for a given ingredients list
