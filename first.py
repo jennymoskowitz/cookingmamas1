@@ -615,13 +615,15 @@ def main():
 
         #set up or accumulate to the tasty table
         v.get_tasty_database(r, cur, conn)
-        # v.pie_chart(r)
    
+        i_list = []
         #calls edamam and netcarb  
         for ingredients in tasty:
-            v.get_edemam_database(cur, conn, ingredients)
-            # v.netcarb_graph(ingredients)
+            i_list.append(ingredients)
+            v.get_edemam_database(cur, conn, ingredients) 
 
+    random_i = random.randrange(len(i_list))
+    v.netcarb_graph(i_list[random_i])
     #calls calculations
     v.writeCalculations(cur, conn)
 
@@ -631,7 +633,7 @@ def main():
     random_index = random.randrange(len(r_list))
 # # #calls visualizations
     #calls pie chart
-    # v.pie_chart(r_list[random_index])
+    v.pie_chart(r_list[random_index])
 
     v.spoonacular_visualization()
 
