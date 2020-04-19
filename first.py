@@ -24,7 +24,7 @@ class Recipies:
 
     #input: none
     #output: returns the response object for Spoonacular API
-    #goes through the Spoonacular API to find 100 random recipies
+    #goes through the Spoonacular API to find 20 random recipies
     def get_recipies(self):
         url = 'https://api.spoonacular.com/recipes/random'
         params = {"apiKey" : '9b08f9ce44274ec4a952ff296062f655', "number" : "20"}
@@ -33,7 +33,7 @@ class Recipies:
         return response
 
     #input: none
-    #output: returns the dictionary keys
+    #output: returns the dictionary of cuisines
     #goes through the recipies returned from the Spoonacular API and makes a dictionary of the cuisines found.
     def get_dict(self):
         dict1 = {}
@@ -45,8 +45,6 @@ class Recipies:
                 if data['recipes'][x]['cuisines'][0] not in dict1:
                     dict1[data['recipes'][x]['cuisines'][0]] = 0
                 dict1[data['recipes'][x]['cuisines'][0]] += 1
-            # else:
-            #     print("Cuisine not found.")
         return dict1
     
     #input: type of cuisine
@@ -87,14 +85,13 @@ class Recipies:
             pass
         return cuisine_ingredients
 
-    #input: cursor and conncetion to the database to create a table within it
+    #input: cursor and connection to the database to create a table within it
     #output: creates categories table for Spoonacular in database --> look below for description
     #sets up the categories table for Spoonacular within the database, if table exists, then only add to the existing database  
     def setUpCategoriesTable(self, cur, conn):
         cuisines = ["African", "American", "British", "Cajun", "Caribbean", "Chinese", "Eastern European", "European",
         "French", "German", "Greek", "Indian", "Irish", "Italian", "Japanese", "Jewish", "Korean", "Latin American", 
         "Mediterranean", "Mexican", "Middle Eastern", "Nordic", "Southern", "Spanish", "Thai", "Vietnamese", "Cuisine not classified"]
-        cur.execute("DROP TABLE IF EXISTS Categories")
         cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Categories' ''')
         if cur.fetchone()[0]==1:
             for i in range(len(cuisines)):
@@ -107,7 +104,7 @@ class Recipies:
             conn.commit()
 
     
-    #input: type of cuisine, cursor and conncetion to the database to create a table within it
+    #input: type of cuisine, cursor and connection to the database to create a table within it
     #output: creates tasty table in database --> look below for description
     #sets up the Tasty table within the database, if table exists, then only add to the existing database  
 
@@ -195,10 +192,10 @@ class Recipies:
                     pass
         except:
             print("Ran into JSON decode error")
-    #input: cursor and conncetion to the database to create a table within it
+
+    #input: cursor and connection to the database to create a table within it
     #output: creates spoonacular table in database --> look below for description
     #sets up the Spoonacular table within the database, if table exists, then only add to the existing database  
-
     def get_spoon_database(self, cur, conn):
         r = self.get_recipies()
         try:
@@ -254,34 +251,31 @@ class Recipies:
         except:
             print("Ran into Json Decode Error")
    
-    #input: cursor, conncetion, and a list of ingredients 
+    #input: cursor, connection, and a list of ingredients 
     #output: creates a Edamam table in database --> look below for description
     #sets up the Edamam table within the database, if table exists, then only add to the existing database  
-
-    def get_edemam_database(self, cur, conn, ingredients):
+    def get_edamam_database(self, cur, conn, ingredients):
         
-        cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Edemam' ''')
+        cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Edamam' ''')
         if cur.fetchone()[0]==1:
             i = str(ingredients)
             carbs = self.get_carbs(ingredients)
             fiber = self.get_fiber(ingredients)
             calories = self.get_calories(ingredients)
-            cur.execute('''INSERT OR IGNORE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories)) 
+            cur.execute('''INSERT OR IGNORE INTO Edamam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories)) 
             conn.commit()
 
         else:
-            cur.execute("CREATE TABLE Edemam (ingredients TEXT, carbs TEXT, fiber TEXT, calories TEXT)")
+            cur.execute("CREATE TABLE Edamam (ingredients TEXT, carbs TEXT, fiber TEXT, calories TEXT)")
             i = str(ingredients)
             carbs = self.get_carbs(ingredients)
             fiber = self.get_fiber(ingredients)
             calories = self.get_calories(ingredients)
-            cur.execute('''INSERT OR IGNORE INTO Edemam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories))
+            cur.execute('''INSERT OR IGNORE INTO Edamam (ingredients, carbs, fiber, calories) VALUES (?, ?, ?, ?)''', (i, carbs, fiber, calories))
             conn.commit()
     
-    #input: cursor and conncetion to the database 
-    #output: joins the Tasty column in names with the carbs column in Edamam by their shared ingredients
-
-
+    #input: cursor and connection to the database 
+    #output: joins the Tasty column in names with the cuisine column in Spoonacular by their shared cuisine id
     def join_recipies(self, cur, conn):
         list_names = []
         cur.execute('''SELECT Tasty.name, Tasty.cuisine FROM Tasty JOIN Spoonacular ON Tasty.cuisine_id = Spoonacular.cuisine_id''')
@@ -317,10 +311,9 @@ class Recipies:
         return sorted_dict
         
 
-    #input: none
-    #output: sets the top most common ingredients and sorts the values of the ingredients dictionary
-    #divides how
-
+    #input: cuisine
+    #output: returns a list of what percent the given ingredient is of the total
+    #divides how common an ingredient is by the total number of ingredients
     def top_ingredients_percents(self, cuisine):
         r = self.get_ingredients_lst(cuisine)
         total = 0
@@ -342,7 +335,7 @@ class Recipies:
 
     #input: none
     #output: Spoonacular bar graph of most popular cuisines and number of recipes.
-
+    #displays a bar graph of cuisines and how many recipes each has
     def spoonacular_visualization(self):
         dict1 = self.get_dict()
         fig = plt.figure(figsize = (10, 5))
@@ -542,7 +535,7 @@ class Recipies:
 
         #Edamam Calculation
         f.write("\nRecipe with the Highest Calorie Count:\n\n")
-        sql = "SELECT ingredients, calories FROM Edemam"
+        sql = "SELECT ingredients, calories FROM Edamam"
         cur.execute(sql)
         max_calories = 0
         for r in cur:
@@ -620,7 +613,7 @@ def main():
         #calls edamam and netcarb  
         for ingredients in tasty:
             i_list.append(ingredients)
-            v.get_edemam_database(cur, conn, ingredients) 
+            v.get_edamam_database(cur, conn, ingredients) 
 
     random_i = random.randrange(len(i_list))
     v.netcarb_graph(i_list[random_i])
