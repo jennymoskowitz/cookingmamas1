@@ -113,143 +113,146 @@ class Recipies:
 
     def get_tasty_database(self, cuisine, cur, conn):
         r = self.get_tasty_recipes(cuisine)
-        data = json.loads(r.text)
-        cur.execute("DROP TABLE IF EXISTS Tasty")
-        cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Tasty' ''')
-        if cur.fetchone()[0]==1:
-            try:
-                for x in range(4):
-                    recipe_id = data['results'][x]["id"]
-                    try:
-                        name = data["results"][x]["name"]
-                    except:
-                        name = data["results"][x]["seo_title"]
-                    if "_" in cuisine:
-                        join_word = []
-                        split_cuisine = cuisine.split("_")
-                        for word in split_cuisine:
-                            w = word[0].upper() + word[1:]
-                            join_word.append(w)
-                        c = (" ").join(join_word)
-                    else:
-                        c = cuisine[0].upper() + cuisine[1:]
-                    cur.execute('SELECT * FROM Categories')
-                    cuisine_id = 0
-                    for row in cur:
-                        i = row[0]
-                        n = row[1]
-                        if n == c:
-                            cuisine_id = i
-                    ingredients = []
-                    try:
-                        for num in range(len(data['results'][x]['sections'])):
-                            for n in range(len(data['results'][x]['sections'][num]['components'])):
-                                ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
-                    except:
-                        for num in range(len(data['results'][x]["recipes"])):
-                            for n in range(len(data['results'][x]["recipes"][num]['sections'])):
-                                for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
-                                    ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                    cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
-                conn.commit()
-            except:
-                pass
-        else:
-            cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, cuisine_id INTEGER, ingredients TEXT)''')
-            try:
-                for x in range(4):
-                    recipe_id = data['results'][x]["id"]
-                    try:
-                        name = data["results"][x]["name"]
-                    except:
-                        name = data["results"][x]["seo_title"]
-                    if "_" in cuisine:
-                        join_word = []
-                        split_cuisine = cuisine.split("_")
-                        for word in split_cuisine:
-                            w = word[0].upper() + word[1:]
-                            join_word.append(w)
-                        c = (" ").join(join_word)
-                    else:
-                        c = cuisine[0].upper() + cuisine[1:]
-                    cur.execute('SELECT * FROM Categories')
-                    cuisine_id = 0
-                    for row in cur:
-                        i = row[0]
-                        n = row[1]
-                        if n == c:
-                            cuisine_id = i
-                    ingredients = []
-                    try:
-                        for num in range(len(data['results'][x]['sections'])):
-                            for n in range(len(data['results'][x]['sections'][num]['components'])):
-                                ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
-                    except:
-                        for num in range(len(data['results'][x]["recipes"])):
-                            for n in range(len(data['results'][x]["recipes"][num]['sections'])):
-                                for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
-                                    ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
-                    cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
-                conn.commit()
-            except:
-                pass
+        try:
+            data = json.loads(r.text)
+            cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Tasty' ''')
+            if cur.fetchone()[0]==1:
+                try:
+                    for x in range(4):
+                        recipe_id = data['results'][x]["id"]
+                        try:
+                            name = data["results"][x]["name"]
+                        except:
+                            name = data["results"][x]["seo_title"]
+                        if "_" in cuisine:
+                            join_word = []
+                            split_cuisine = cuisine.split("_")
+                            for word in split_cuisine:
+                                w = word[0].upper() + word[1:]
+                                join_word.append(w)
+                            c = (" ").join(join_word)
+                        else:
+                            c = cuisine[0].upper() + cuisine[1:]
+                        cur.execute('SELECT * FROM Categories')
+                        cuisine_id = 0
+                        for row in cur:
+                            i = row[0]
+                            n = row[1]
+                            if n == c:
+                                cuisine_id = i
+                        ingredients = []
+                        try:
+                            for num in range(len(data['results'][x]['sections'])):
+                                for n in range(len(data['results'][x]['sections'][num]['components'])):
+                                    ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
+                        except:
+                            for num in range(len(data['results'][x]["recipes"])):
+                                for n in range(len(data['results'][x]["recipes"][num]['sections'])):
+                                    for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
+                                        ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
+                        cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
+                    conn.commit()
+                except:
+                    pass
+            else:
+                cur.execute('''CREATE TABLE Tasty (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, cuisine_id INTEGER, ingredients TEXT)''')
+                try:
+                    for x in range(4):
+                        recipe_id = data['results'][x]["id"]
+                        try:
+                            name = data["results"][x]["name"]
+                        except:
+                            name = data["results"][x]["seo_title"]
+                        if "_" in cuisine:
+                            join_word = []
+                            split_cuisine = cuisine.split("_")
+                            for word in split_cuisine:
+                                w = word[0].upper() + word[1:]
+                                join_word.append(w)
+                            c = (" ").join(join_word)
+                        else:
+                            c = cuisine[0].upper() + cuisine[1:]
+                        cur.execute('SELECT * FROM Categories')
+                        cuisine_id = 0
+                        for row in cur:
+                            i = row[0]
+                            n = row[1]
+                            if n == c:
+                                cuisine_id = i
+                        ingredients = []
+                        try:
+                            for num in range(len(data['results'][x]['sections'])):
+                                for n in range(len(data['results'][x]['sections'][num]['components'])):
+                                    ingredients.append(data['results'][x]['sections'][num]['components'][n]['raw_text'])
+                        except:
+                            for num in range(len(data['results'][x]["recipes"])):
+                                for n in range(len(data['results'][x]["recipes"][num]['sections'])):
+                                    for j in range(len(data['results'][x]["recipes"][num]['sections'][n]['components'])):
+                                        ingredients.append(data['results'][x]["recipes"][num]['sections'][n]['components'][j]['raw_text'])
+                        cur.execute('''INSERT OR REPLACE INTO Tasty (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, c, cuisine_id, str(ingredients)))
+                    conn.commit()
+                except:
+                    pass
+        except:
+            print("Ran into JSON decode error")
     #input: cursor and conncetion to the database to create a table within it
     #output: creates spoonacular table in database --> look below for description
     #sets up the Spoonacular table within the database, if table exists, then only add to the existing database  
 
     def get_spoon_database(self, cur, conn):
         r = self.get_recipies()
-        data = json.loads(r.text)
-        cur.execute("DROP TABLE IF EXISTS Spoonacular")
-        cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Spoonacular' ''')
-        if cur.fetchone()[0]==1:
-            for x in range(len(data['recipes'])): #run 20 each time
-                recipe_id = data['recipes'][x]["id"]
-                name = data['recipes'][x]['title']
-                if len(data['recipes'][x]['cuisines']) > 0:
-                    cuisine = data['recipes'][x]['cuisines'][0]
-            
-                else:
-                    cuisine = "Cuisine not classified"
-                cur.execute('SELECT * FROM Categories')
-                cuisine_id = 0
-                for row in cur:
-                    i = row[0]
-                    n = row[1]
-                    if n == cuisine:
-                        cuisine_id = i
+        try:
+            data = json.loads(r.text)
+            cur.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='Spoonacular' ''')
+            if cur.fetchone()[0]==1:
+                for x in range(len(data['recipes'])): #run 20 each time
+                    recipe_id = data['recipes'][x]["id"]
+                    name = data['recipes'][x]['title']
+                    if len(data['recipes'][x]['cuisines']) > 0:
+                        cuisine = data['recipes'][x]['cuisines'][0]
+                
+                    else:
+                        cuisine = "Cuisine not classified"
+                    cur.execute('SELECT * FROM Categories')
+                    cuisine_id = 0
+                    for row in cur:
+                        i = row[0]
+                        n = row[1]
+                        if n == cuisine:
+                            cuisine_id = i
+                    ingredients = []
+                    for num in range(len(data['recipes'][x]['analyzedInstructions'])):
+                        for n in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'])):
+                            for j in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'])):
+                                ingredients.append(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'][j]['name'])
+                    cur.execute('''INSERT OR IGNORE INTO Spoonacular (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, cuisine, cuisine_id, str(ingredients)))
+                conn.commit()
+            else:
+                cur.execute('''CREATE TABLE IF NOT EXISTS Spoonacular (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, cuisine_id INTEGER, ingredients TEXT)''')
+                for x in range(len(data['recipes'])):
+                    recipe_id = data['recipes'][x]["id"]
+                    name = data['recipes'][x]['title']
+                    if len(data['recipes'][x]['cuisines']) > 0:
+                        cuisine = data['recipes'][x]['cuisines'][0]
+                
+                    else:
+                        cuisine = "Cuisine not classified"
+                    cur.execute('SELECT * FROM Categories')
+                    cuisine_id = 0
+                    for row in cur:
+                        i = row[0]
+                        n = row[1]
+                        if n == cuisine:
+                            cuisine_id = i
                 ingredients = []
                 for num in range(len(data['recipes'][x]['analyzedInstructions'])):
                     for n in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'])):
                         for j in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'])):
                             ingredients.append(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'][j]['name'])
-                cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, cuisine, cuisine_id, str(ingredients)))
-            conn.commit()
-        else:
-            cur.execute('''CREATE TABLE Spoonacular (recipe_id TEXT PRIMARY KEY, name TEXT, cuisine TEXT, cuisine_id INTEGER, ingredients TEXT)''')
-            for x in range(len(data['recipes'])):
-                recipe_id = data['recipes'][x]["id"]
-                name = data['recipes'][x]['title']
-                if len(data['recipes'][x]['cuisines']) > 0:
-                    cuisine = data['recipes'][x]['cuisines'][0]
-            
-                else:
-                    cuisine = "Cuisine not classified"
-                cur.execute('SELECT * FROM Categories')
-                cuisine_id = 0
-                for row in cur:
-                    i = row[0]
-                    n = row[1]
-                    if n == cuisine:
-                        cuisine_id = i
-            ingredients = []
-            for num in range(len(data['recipes'][x]['analyzedInstructions'])):
-                for n in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'])):
-                    for j in range(len(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'])):
-                        ingredients.append(data['recipes'][x]['analyzedInstructions'][num]['steps'][n]['ingredients'][j]['name'])
-                cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, cuisine, cuisine_id, str(ingredients)))
-            conn.commit()
-    
+                    cur.execute('''INSERT OR REPLACE INTO Spoonacular (recipe_id, name, cuisine, cuisine_id, ingredients) VALUES (?, ?, ?, ?, ?)''', (recipe_id, name, cuisine, cuisine_id, str(ingredients)))
+                conn.commit()
+        except:
+            print("Ran into Json Decode Error")
    
     #input: cursor, conncetion, and a list of ingredients 
     #output: creates a Edamam table in database --> look below for description
@@ -436,9 +439,14 @@ class Recipies:
     #output:
     def netcarb_graph(self, ingredients):
 
+
+        cur.execute("SELECT * from Edemam")
+        for row in cur:
+            ingredients = row[0]
+            carbs = row[1]
+            fiber = row[2]
         carbs = np.arange(self.get_carbs(ingredients))
         fiber = np.arange(self.get_fiber(ingredients))
-
 
         N = len(ingredients)
         ind = np.arange(N)
@@ -678,7 +686,7 @@ def main():
     #set up or accumulate to the spoonacular table
     v.get_spoon_database(cur, conn)
 
-
+    r_list = []
     # for loop through the different cuisines
     for rec in cuisines:
         # change the format to put in the next api
@@ -696,6 +704,7 @@ def main():
             # make the first letter lower case in the cuisine in order to input it into the next api
             r = rec[0].lower() + rec[1:]
         # input the cuisine into the tasty api and output a list of ingredients for each recipie for the cuisine
+        r_list.append(r)
         tasty = v.get_ingredients(r)
         
 
@@ -706,17 +715,20 @@ def main():
 # #         #calls edamam and netcarb  
         for ingredients in tasty:
             v.get_edemam_database(cur, conn, ingredients)
-            v.netcarb_graph(ingredients)
+            # v.netcarb_graph(ingredients)
 
 # #     #calls calculations
-    # v.writeCalculations(cur, conn)
+    v.writeCalculations(cur, conn)
 
 # #     #calls join ingredients
+    
 #     v.join_Ingredients(cur, conn)
-
+    # v.spoonacular_visualization()
+    random_index = random.randrange(len(r_list))
+    print(random_index)
 # # #calls visualizations
 # #     #calls pie chart
-    
+    v.pie_chart(r_list[random_index])
 
 # #     #calls price histogram
 #     v.priceHistogram(cur, conn)
