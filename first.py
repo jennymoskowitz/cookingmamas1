@@ -27,7 +27,7 @@ class Recipies:
     #goes through the Spoonacular API to find 100 random recipies
     def get_recipies(self):
         url = 'https://api.spoonacular.com/recipes/random'
-        params = {"apiKey" : '9edff64788dc4a88af9dcf1e9965568d', "number" : "20"}
+        params = {"apiKey" : '9b08f9ce44274ec4a952ff296062f655', "number" : "20"}
         response = requests.request("GET", url, params = params)
 
         return response
@@ -372,57 +372,6 @@ class Recipies:
             plt.show()
         except:
             pass
-
-    #input: cursor and conncetion to the database to access its data
-    #output: creates the histogram of Average Calories by Cuisine Type
-    def caloriesHistogram(self, cur, conn):
-        list1 = []
-        cur.execute('''SELECT Tasty.cuisine, Edemam.calories
-        FROM Tasty
-        INNER JOIN Edemam
-        ON Tasty.ingredients = Edemam.ingredients''')
-        calorie_dict = {}
-        recipie_dict = {}
-        for row in cur:
-            list1.append(row)
-
-        for r in list1:
-            if r[0] in calorie_dict:
-                calorie_dict[r[0]] += r[1]
-                recipie_dict[0] += 1
-            else:
-                calorie_dict[r[0]] = 0
-                calorie_dict[r[0]] += r[1]
-                recipie_dict[0] = 0
-                recipie_dict[0] += 1
-        
-        cuisine_dict = {}
-        for x in calorie_dict.keys():
-            avg_cal = calorie_dict[x] / recipie_dict[x]
-            cuisine_dict[x] = 0
-            cuisine_dict[x] += avg_cal
-        
-       
-        sorted_cuisinedict = sorted(cuisine_dict.items())
-        fig = plt.figure(figsize = (10, 5))
-        ax1 = fig.add_subplot(121)
-        ax1.bar([1,2,3], [3,4,5], color='pink')
-        cuisines = sorted_cuisinedict[0]
-        calories = sorted_cuisinedict[1]
-        plt.bar(cuisines, calories)
-        plt.suptitle("Average Calories of Recipes by Cusine Type")
-        plt.show()
-        
-        
-        # plt.xlabel("Cuisine Type")
-        # plt.ylabel("Average Number of Calories")
-        # plt.title("Histogram of Average Calories of Recipes by Cusine Type")
-        # plt.xlim(sorted_cuisinedict[0], sorted_cuisinedict[-1])
-        # plt.ylim(0, 15)
-
-        # plt.hist(sortedAveragePrices, bins=numEvents, range=None, density=None, weights=None, cumulative=False, bottom=None, histtype='bar', align='mid', orientation='vertical', rwidth=None, log=False, color=None, label=None, stacked=False, normed=None, data=None)
-
-        # plt.show()
 
 
     #input: none
