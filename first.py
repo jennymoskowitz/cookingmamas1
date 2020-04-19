@@ -71,7 +71,7 @@ class Recipies:
         r = self.get_tasty_recipes(cuisine)
         data = json.loads(r.text)
         try:
-            for x in range(4):
+            for x in range(len(data['results'])):
                 ingredients = []
                 try:
                     for num in range(len(data['results'][x]['sections'])):
@@ -297,38 +297,47 @@ class Recipies:
     def get_ingredients_lst(self, cuisine):
         ingredients = self.get_ingredients(cuisine)
         ingredients_dict= {}
-        for x in ingredients:
-            for y in x: 
-                if y in ingredients_dict: 
-                    ingredients_dict[y] += 1
-                else: 
-                    ingredients_dict[y] = 0 
-                    ingredients_dict[y] += 1
-        sorted_dict = sorted(ingredients_dict, reverse=True)
-        sorted_keys = sorted_dict.keys()
-        i1 = sorted_keys[0]
-        i2 = sorted_keys[1]
-        i3 = sorted_keys[2]
-        i4 = sorted_keys[3]
-        i5 = sorted_keys[4]
-        sorted_vals = sorted_dict.values()
-        for i in sorted_vals[0:4]:
-            total += i
-        return total 
+        try:
+            for x in ingredients:
+                for y in x: 
+                    if y in ingredients_dict: 
+                        ingredients_dict[y] += 1
+                    else: 
+                        ingredients_dict[y] = 0 
+                        ingredients_dict[y] += 1
+            sorted_dict = sorted(ingredients_dict.items(), key = lambda x: x[1], reverse=True)
+            print(sorted_dict)
+            i1 = sorted_dict[0]
+            i2 = sorted_dict[1]
+            i3 = sorted_dict[2]
+            i4 = sorted_dict[3]
+            i5 = sorted_dict[4]
+        except:
+            pass
+        return sorted_dict
+        
 
     #input: none
     #output: sets the top most common ingredients and sorts the values of the ingredients dictionary
     #divides how
 
-    def top_ingredients_percents(self):
-        r = get_ingredients_lst(cuisine)
-        i1_percent = sorted_vals[0] / r
-        i2_percent = sorted_vals[1] / r
-        i3_percent = sorted_vals[2] / r
-        i4_percent = sorted_vals[3] / r
-        i5_percent = sorted_vals[4] / r
-        other_amount = r - (i1_percent + i2_percent + i3_percent + i4_percent + i5_percent) 
-        other_percent = other_amount / r
+    def top_ingredients_percents(self, cuisine):
+        r = self.get_ingredients_lst(cuisine)
+        total = 0
+        try:
+            for i in r[0:4]:
+                for x in i:
+                    total += i[1] 
+            i1_percent = r[0][1] / total
+            i2_percent = r[1][1] / total
+            i3_percent = r[2][1] / total
+            i4_percent = r[3][1] / total
+            i5_percent = r[4][1] / total
+            other_amount = total - (i1_percent + i2_percent + i3_percent + i4_percent + i5_percent) 
+            other_percent = other_amount / total
+            return [i1_percent, i2_percent, i3_percent, i4_percent, i5_percent, other_percent]
+        except:
+            pass
 
 
     #input: none
@@ -348,16 +357,21 @@ class Recipies:
     
     #input: none
     #output: Tasty Pie chart breakdown of percentage of recipes top 5 ingredients are in 
-    def pie_chart(self):
-        labels = i1, i2, i3, i4, i5, 'others'
-        sizes = [self.i1_percent, self.i2_percent, self.i3_percent, self.i4_percent, self.i5_percent, self.other_percent]
-        explode = (0, 0.1, 0, 0, 0, 0, 0, 0)
-        fig1, ax1 = plt.subplots()
-        ax1.pie(sizes, explode=explode, shadow=True, startangle=90)
-        ax1.axis('equal') 
-        plt.legend( loc = 'best', labels=['%s, %1.1f %%' % (l, s) for l, s in zip(labels, sizes)])
-        plt.title("Pie Chart of Most Popular Ingredients")
-        plt.show()
+    def pie_chart(self, cuisine):
+        v = self.get_ingredients_lst(cuisine)
+        r = self.top_ingredients_percents(cuisine)
+        try:
+            labels = v[0], v[1], v[2], v[3], v[4], 'Others'
+            sizes = [r[0], r[1], r[2], r[3], r[4], r[5]]
+            explode = (0, 0, 0, 0, 0, 0.1)
+            fig1, ax1 = plt.subplots()
+            ax1.pie(sizes, explode=explode, shadow=True, startangle=90)
+            ax1.axis('equal') 
+            plt.legend( loc = 'best', labels=['%s, %1.1f %%' % (l, s) for l, s in zip(labels, sizes)])
+            plt.title("Pie Chart of Most Popular Ingredients")
+            plt.show()
+        except:
+            pass
 
     #input: cursor and conncetion to the database to access its data
     #output: creates the histogram of Average Calories by Cuisine Type
@@ -600,6 +614,7 @@ def main():
     #set up or accumulate to the spoonacular table
     v.get_spoon_database(cur, conn)
 
+
     # for loop through the different cuisines
     for rec in cuisines:
         # change the format to put in the next api
@@ -618,13 +633,16 @@ def main():
             r = rec[0].lower() + rec[1:]
         # input the cuisine into the tasty api and output a list of ingredients for each recipie for the cuisine
         tasty = v.get_ingredients(r)
+        print(tasty)
+
         #set up or accumulate to the tasty table
         v.get_tasty_database(r, cur, conn)
+        # v.pie_chart(r)
    
 # #         #calls edamam and netcarb  
         for ingredients in tasty:
             v.get_edemam_database(cur, conn, ingredients)
-            # v.netcarb_graph(ingredients)
+            v.netcarb_graph(ingredients)
 
 # #     #calls calculations
     # v.writeCalculations(cur, conn)
@@ -634,7 +652,7 @@ def main():
 
 # # #calls visualizations
 # #     #calls pie chart
-    v.pie_chart()
+    
 
 # #     #calls price histogram
 #     v.priceHistogram(cur, conn)
