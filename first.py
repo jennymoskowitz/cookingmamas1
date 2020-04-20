@@ -456,6 +456,38 @@ class Recipes:
         plt.legend(labels=['Carb', 'Fiber'])
         plt.show()
 
+    def generate_scatter(self, ingredients):
+        count = 0
+        r = self.get_nutrient_data(ingredients)
+        lst = []
+        l2 = []
+        for item in range(len(r)):
+            try:
+                carb_quantity = r[item]['totalNutrients']["CHOCDF"]["quantity"]
+                lst.append(carb_quantity)
+                
+            except:
+                y = "no key"
+            
+        for item in range(len(r)):
+            try:
+                calories = (r[item]['calories'])
+                l2.append(calories)
+            except:
+                y = "no key"
+
+        
+
+        for l,l1 in total:
+            plt.plot(np.arange(l), marker = 'o', color = 'blue')
+            plt.plot(np.arange(l1), marker = '^', color = 'green')
+            plt.ylabel('Number of Calories')
+            plt.xlabel('Carb Quantity')
+    
+        plt.title('Number of Calories vs Carb Quantity')
+        
+        plt.show()
+
 #---------------------------
     #input: cursor and connection to the database to access its data
     #output: returns calculations from the data in each of the tables 
@@ -591,31 +623,33 @@ def main():
  
         for ingredients in tasty:
             #append the ingredients names into a list
-            i_list.append(ingredients)
-            #set up or accumulate to the Edamam table
-            v.get_edamam_database(cur, conn, ingredients) 
+            # i_list.append(ingredients)
+            # #set up or accumulate to the Edamam table
+            # v.get_edamam_database(cur, conn, ingredients) 
+            v.generate_scatter(ingredients)
 
 
-    if len(i_list) != 0:
-        #picks a random index to be put into the netcarb graph
-        random_i = random.randrange(len(i_list))
-        #calls the netcarb graph for a random index in the ingredients list
-        v.netcarb_graph(i_list[random_i])
+
+    # if len(i_list) != 0:
+    #     #picks a random index to be put into the netcarb graph
+    #     random_i = random.randrange(len(i_list))
+    #     #calls the netcarb graph for a random index in the ingredients list
+    #     v.netcarb_graph(i_list[random_i])
     
-    #calls calculations
-    v.writeCalculations(cur, conn)
+    # #calls calculations
+    # v.writeCalculations(cur, conn)
 
-    #calls join recipes
-    v.join_recipes(cur, conn)
+    # #calls join recipes
+    # v.join_recipes(cur, conn)
 
-    #picks a random index to be put into the pie chart
-    random_index = random.randrange(len(r_list))
+    # #picks a random index to be put into the pie chart
+    # random_index = random.randrange(len(r_list))
 
-    #calls pie chartfor a random index in the cuisines list
-    v.pie_chart(r_list[random_index])
+    # #calls pie chartfor a random index in the cuisines list
+    # v.pie_chart(r_list[random_index])
 
-    #calls bar graph
-    v.spoonacular_visualization()
+    # #calls bar graph
+    # v.spoonacular_visualization()
 
 
 
