@@ -1,5 +1,4 @@
 import requests
-from bs4 import BeautifulSoup
 import json
 import sqlite3
 import matplotlib
@@ -27,7 +26,7 @@ class Recipes:
     #goes through the Spoonacular API to find 20 random recipes
     def get_recipes(self):
         url = 'https://api.spoonacular.com/recipes/random'
-        params = {"apiKey" : '9b08f9ce44274ec4a952ff296062f655', "number" : "20"}
+        params = {"apiKey" : '0e4adedfe2f149aca537c1e319acdd32', "number" : "20"}
         response = requests.request("GET", url, params = params)
 
         return response
@@ -100,7 +99,7 @@ class Recipes:
             new_lst = []
             new_lst.append(ingredient)
     
-            querystring = {"app_id": "aebe8142", "app_key": "bd81b2e402ef88d91e7217786867a488", "ingr": new_lst}
+            querystring = {"app_id": "8b23123c", "app_key": "f4105565f2158a463d9a4511e45299cc", "ingr": new_lst}
 
             response = requests.request("GET", url, params=querystring)
             response1 = json.loads(response.text)
@@ -456,37 +455,39 @@ class Recipes:
         plt.legend(labels=['Carb', 'Fiber'])
         plt.show()
 
-    def generate_scatter(self, ingredients):
-        count = 0
-        r = self.get_nutrient_data(ingredients)
-        lst = []
-        l2 = []
-        for item in range(len(r)):
-            try:
-                carb_quantity = r[item]['totalNutrients']["CHOCDF"]["quantity"]
-                lst.append(carb_quantity)
+
+#---------------------------EXTRA CREDIT --------------------------- #
+    # def generate_scatter(self, ingredients):
+    #     count = 0
+    #     r = self.get_nutrient_data(ingredients)
+    #     lst = []
+    #     l2 = []
+    #     for item in range(len(r)):
+    #         try:
+    #             carb_quantity = r[item]['totalNutrients']["CHOCDF"]["quantity"]
+    #             lst.append(carb_quantity)
                 
-            except:
-                y = "no key"
+    #         except:
+    #             y = "no key"
             
-        for item in range(len(r)):
-            try:
-                calories = (r[item]['calories'])
-                l2.append(calories)
-            except:
-                y = "no key"
+    #     for item in range(len(r)):
+    #         try:
+    #             calories = (r[item]['calories'])
+    #             l2.append(calories)
+    #         except:
+    #             y = "no key"
 
         
 
-        for l,l1 in total:
-            plt.plot(np.arange(l), marker = 'o', color = 'blue')
-            plt.plot(np.arange(l1), marker = '^', color = 'green')
-            plt.ylabel('Number of Calories')
-            plt.xlabel('Carb Quantity')
+    #     for l,l1 in total:
+    #         plt.plot(np.arange(l), marker = 'o', color = 'blue')
+    #         plt.plot(np.arange(l1), marker = '^', color = 'green')
+    #         plt.ylabel('Number of Calories')
+    #         plt.xlabel('Carb Quantity')
     
-        plt.title('Number of Calories vs Carb Quantity')
+    #     plt.title('Number of Calories vs Carb Quantity')
         
-        plt.show()
+    #     plt.show()
 
 #---------------------------
     #input: cursor and connection to the database to access its data
@@ -623,33 +624,33 @@ def main():
  
         for ingredients in tasty:
             #append the ingredients names into a list
-            # i_list.append(ingredients)
-            # #set up or accumulate to the Edamam table
-            # v.get_edamam_database(cur, conn, ingredients) 
-            v.generate_scatter(ingredients)
+            i_list.append(ingredients)
+            #set up or accumulate to the Edamam table
+            v.get_edamam_database(cur, conn, ingredients) 
+            # v.generate_scatter(ingredients)
 
 
 
-    # if len(i_list) != 0:
-    #     #picks a random index to be put into the netcarb graph
-    #     random_i = random.randrange(len(i_list))
-    #     #calls the netcarb graph for a random index in the ingredients list
-    #     v.netcarb_graph(i_list[random_i])
+    if len(i_list) != 0:
+        #picks a random index to be put into the netcarb graph
+        random_i = random.randrange(len(i_list))
+        #calls the netcarb graph for a random index in the ingredients list
+        v.netcarb_graph(i_list[random_i])
     
-    # #calls calculations
-    # v.writeCalculations(cur, conn)
+    #calls calculations
+    v.writeCalculations(cur, conn)
 
-    # #calls join recipes
-    # v.join_recipes(cur, conn)
+    #calls join recipes
+    v.join_recipes(cur, conn)
 
-    # #picks a random index to be put into the pie chart
-    # random_index = random.randrange(len(r_list))
+    #picks a random index to be put into the pie chart
+    random_index = random.randrange(len(r_list))
 
-    # #calls pie chartfor a random index in the cuisines list
-    # v.pie_chart(r_list[random_index])
+    #calls pie chartfor a random index in the cuisines list
+    v.pie_chart(r_list[random_index])
 
-    # #calls bar graph
-    # v.spoonacular_visualization()
+    #calls bar graph
+    v.spoonacular_visualization()
 
 
 
